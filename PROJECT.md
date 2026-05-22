@@ -86,21 +86,61 @@ Each entry must have these exact fields:
 ```
 
 ### TOTAL constant
-Single number — sum of all CLUBS.goals values.
-Must equal sum of all TYPES.total values (or document any offset).
+Single number — the player's net career goal total (= sum of CLUBS.goals).
+When the penalty overlap pattern is used, sum(TYPES.total) will exceed
+TOTAL — this is expected. See Data edge cases below.
 
-### Validation rules
-- Every TYPES.total must equal sum of LINKS where type === id
-- Every CLUBS.goals must equal sum of LINKS where club === name
+### Validation rules (standard — no penalty overlap)
 - TOTAL must equal sum of CLUBS.goals
+- Every TYPES.total must equal sum of LINKS where type === id
+- CLUBS.goals represent actual club totals (used for right bar heights);
+  LINKS are visual approximations and may not sum exactly to CLUBS.goals
 - All LINKS must reference valid type ids and club names
+
+### Validation rules (penalty overlap pattern)
+- TOTAL must equal sum of CLUBS.goals
+- Every TYPES.total must equal sum of LINKS where type === id
+- sum(TYPES.total) will be > TOTAL — expected and intentional
+- Right/left foot LINKS already exclude penalties (no double-counting)
+- Document the overlap in a comment at the top of the component DATA section
 
 ## Adding a new player
 1. Duplicate MessiSankey.jsx → rename e.g. RonaldoSankey.jsx
-2. Replace TYPES, CLUBS, LINKS data arrays
-3. Update TOTAL constant
-4. Add a new route: app/ronaldo/page.js → import RonaldoSankey
-5. Keep all layout constants identical for style consistency
+2. Replace TYPES, CLUBS, LINKS, TOTAL data arrays
+3. Update the component name and header text inside the file
+4. Add a new route: app/[player]/page.js → import the component
+5. Add the player to the PLAYERS array in app/layout.js (nav bar)
+6. Keep all layout constants identical for style consistency
+7. If using penalty overlap pattern, add the explaining comment at top of DATA section
+
+## Data edge cases
+
+### Penalty overlap (Raúl Jiménez pattern)
+Some players have penalties broken out as a separate TYPES entry
+for storytelling purposes, even though penalties are physically
+scored with a foot (right or left).
+
+When this applies:
+- TYPES will include a "penalty" entry alongside "right" and "left"
+- The TOTAL constant = sum of CLUBS.goals (net unique goals)
+- Penalty values in LINKS are NOT additive to right/left foot values
+- The right/left foot values in LINKS already exclude penalties
+
+Example: a player with 100 right-foot goals (80 open play + 20 penalties)
+should be represented as:
+  right foot: 80  (open play only)
+  penalty:    20  (separate type)
+  TOTAL:      100 (not 120)
+
+Validation rule that differs from standard:
+  sum(TYPES.total) will be > TOTAL when penalties are broken out
+  This is expected and intentional — document it in a comment
+  inside the component file.
+
+### When to break out penalties
+Apply this pattern when a player scores 15+ penalties in their career
+or when penalties represent a defining characteristic of their style
+(e.g. Kane, Jiménez). Otherwise fold into right/left foot totals.
 
 ## Key layout constants (keep consistent across players)
 W=960, H=540, LEFT_X=155, MID_X=480, RIGHT_X=810, NODE_W=16

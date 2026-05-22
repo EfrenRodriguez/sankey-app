@@ -1,5 +1,5 @@
-import RonaldoSankey from "../components/RonaldoSankey";
+import CristianoRonaldoSankey from "../components/CristianoRonaldoSankey";
 
 export default function RonaldoPage() {
-  return <RonaldoSankey />;
+  return <CristianoRonaldoSankey />;
 }

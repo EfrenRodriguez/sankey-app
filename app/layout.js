@@ -3,8 +3,12 @@ import Link from "next/link";
 import "./globals.css";
 
 const PLAYERS = [
-  { name: "Messi",   href: "/"        },
-  { name: "Ronaldo", href: "/ronaldo" },
+  { name: "Messi",    href: "/"         },
+  { name: "Cristiano Ronaldo",  href: "/ronaldo"  },
+  { name: "Haaland",  href: "/haaland"  },
+  { name: "Mbappé",   href: "/mbappe"   },
+  { name: "Jiménez",  href: "/jimenez"  },
+  { name: "Kane",     href: "/kane"     },
 ];
 
 const geistSans = Geist({
