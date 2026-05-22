@@ -3,45 +3,46 @@
 import { useState } from "react";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
+// Note: penalty (102) is a storytelling subset — those goals are already
+// counted within the right foot split. TOTAL reflects net career goals.
+// sum(TYPES.total) = 536 > TOTAL (510) — expected per penalty overlap pattern.
 const TYPES = [
-  { id: "right",    label: "Right foot", total: 620, pct: "64%", color: "#E8361A" },
-  { id: "left",     label: "Left foot",  total: 187, pct: "19%", color: "#4F86C6" },
-  { id: "header",   label: "Header",     total: 164, pct: "17%", color: "#5BAD8F" },
+  { id: "right",   label: "Right foot", total: 306, pct: "60%", color: "#C8102E" },
+  { id: "penalty", label: "Penalty",    total: 102, pct: "20%", color: "#E8A838" },
+  { id: "header",  label: "Header",     total: 77,  pct: "15%", color: "#5BAD8F" },
+  { id: "left",    label: "Left foot",  total: 51,  pct: "10%", color: "#4F86C6" },
 ];
 
 const CLUBS = [
-  { name: "Real Madrid",     goals: 451, color: "#7B3F9E", tcolor: "#5a2d75", years: "2009–2018" },
-  { name: "Manchester Utd",  goals: 145, color: "#C8102E", tcolor: "#C8102E", years: "2003–2009, 2021–2022" },
-  { name: "Al Nassr",        goals: 129, color: "#F5C518", tcolor: "#8a6e00", years: "2023–present" },
-  { name: "Juventus",        goals: 101, color: "#1a1a1a", tcolor: "#1a1a1a", years: "2018–2021" },
-  { name: "Portugal",        goals: 143, color: "#006600", tcolor: "#004d00", years: "2003–present" },
-  { name: "Sporting CP",     goals: 5,   color: "#006B2B", tcolor: "#004d1f", years: "2002–2003" },
+  { name: "Tottenham",  goals: 280, color: "#132257", tcolor: "#132257", years: "2009–2023"    },
+  { name: "Bayern",     goals: 140, color: "#DC052D", tcolor: "#DC052D", years: "2023–present" },
+  { name: "England",    goals: 78,  color: "#C8102E", tcolor: "#9e0c24", years: "2015–present" },
+  { name: "Loan clubs", goals: 16,  color: "#888888", tcolor: "#555555", years: "2011–2013"    },
 ];
 
 const LINKS = [
-  { type: "right", club: "Real Madrid",    value: 289 },
-  { type: "right", club: "Manchester Utd", value: 93  },
-  { type: "right", club: "Al Nassr",       value: 83  },
-  { type: "right", club: "Juventus",       value: 65  },
-  { type: "right", club: "Portugal",       value: 85  },
-  { type: "right", club: "Sporting CP",    value: 5   },
+  { type: "right",   club: "Tottenham",  value: 168 },
+  { type: "right",   club: "Bayern",     value: 84  },
+  { type: "right",   club: "England",    value: 47  },
+  { type: "right",   club: "Loan clubs", value: 10  },
 
-  { type: "left",  club: "Real Madrid",    value: 86  },
-  { type: "left",  club: "Manchester Utd", value: 28  },
-  { type: "left",  club: "Al Nassr",       value: 24  },
-  { type: "left",  club: "Juventus",       value: 19  },
-  { type: "left",  club: "Portugal",       value: 27  },
-  { type: "left",  club: "Sporting CP",    value: 3   },
+  { type: "penalty", club: "Tottenham",  value: 56 },
+  { type: "penalty", club: "Bayern",     value: 28 },
+  { type: "penalty", club: "England",    value: 15 },
+  { type: "penalty", club: "Loan clubs", value: 3  },
 
-  { type: "header", club: "Real Madrid",    value: 76  },
-  { type: "header", club: "Manchester Utd", value: 24  },
-  { type: "header", club: "Al Nassr",       value: 22  },
-  { type: "header", club: "Juventus",       value: 17  },
-  { type: "header", club: "Portugal",       value: 22  },
-  { type: "header", club: "Sporting CP",    value: 3   },
+  { type: "header",  club: "Tottenham",  value: 42 },
+  { type: "header",  club: "Bayern",     value: 21 },
+  { type: "header",  club: "England",    value: 12 },
+  { type: "header",  club: "Loan clubs", value: 2  },
+
+  { type: "left",    club: "Tottenham",  value: 28 },
+  { type: "left",    club: "Bayern",     value: 14 },
+  { type: "left",    club: "England",    value: 7  },
+  { type: "left",    club: "Loan clubs", value: 2  },
 ];
 
-const TOTAL = 971;
+const TOTAL = 510;
 
 // ─── LAYOUT ───────────────────────────────────────────────────────────────────
 const W       = 960;
@@ -54,9 +55,9 @@ const PAD_T   = 88;
 const PAD_B   = 44;
 const AVAIL   = H - PAD_T - PAD_B;
 
-const MID_H     = AVAIL * 0.60;
-const MID_TOP   = PAD_T + (AVAIL - MID_H) / 2;
-const MID_BOT   = MID_TOP + MID_H;
+const MID_H   = AVAIL * 0.60;
+const MID_TOP = PAD_T + (AVAIL - MID_H) / 2;
+const MID_BOT = MID_TOP + MID_H;
 
 const midSegs = (() => {
   let y = MID_TOP;
@@ -68,7 +69,7 @@ const midSegs = (() => {
   });
 })();
 
-const L_GAP = 20;
+const L_GAP    = 20;
 const lHeights = TYPES.map(t => Math.max(6, (t.total / TOTAL) * (AVAIL * 0.68)));
 const lTotal   = lHeights.reduce((s, h) => s + h, 0) + L_GAP * (TYPES.length - 1);
 const lNodes   = (() => {
@@ -81,7 +82,7 @@ const lNodes   = (() => {
   });
 })();
 
-const R_GAP = 28;
+const R_GAP    = 28;
 const rHeights = CLUBS.map(c => Math.max(16, (c.goals / TOTAL) * (AVAIL * 0.72)));
 const rTotal   = rHeights.reduce((s, h) => s + h, 0) + R_GAP * (CLUBS.length - 1);
 const rNodes   = (() => {
@@ -96,9 +97,9 @@ const rNodes   = (() => {
 
 // ─── FLOWS ────────────────────────────────────────────────────────────────────
 function buildFlows() {
-  const lCursor  = {};  lNodes.forEach(n => { lCursor[n.id]   = n.y; });
-  const mCursor  = {};  midSegs.forEach(s => { mCursor[s.typeId] = s.y; });
-  const rCursor  = {};  rNodes.forEach(n => { rCursor[n.name]  = n.y; });
+  const lCursor = {};  lNodes.forEach(n => { lCursor[n.id]   = n.y; });
+  const mCursor = {};  midSegs.forEach(s => { mCursor[s.typeId] = s.y; });
+  const rCursor = {};  rNodes.forEach(n => { rCursor[n.name]  = n.y; });
 
   const leftFlows  = [];
   const rightFlows = [];
@@ -117,17 +118,17 @@ function buildFlows() {
       const tM = (link.value / type.total) * midSeg.h;
       const tR = Math.max(1.5, (link.value / TOTAL) * (AVAIL * 0.72));
 
-      const lCy = lCursor[type.id] + tL / 2;
+      const lCy  = lCursor[type.id] + tL / 2;
       const mCyL = mCursor[type.id] + tM / 2;
       leftFlows.push({
         id: `lf${fid}`,
         typeId: type.id, club: link.club,
         color: type.color,
-        x1: lNode.x, y1: lCy, t1: tL,
+        x1: lNode.x, y1: lCy,  t1: tL,
         x2: MID_X,   y2: mCyL, t2: tM,
       });
 
-      const rCy  = rCursor[link.club] + tR / 2;
+      const rCy = rCursor[link.club] + tR / 2;
       rightFlows.push({
         id: `rf${fid}`,
         typeId: type.id, club: link.club,
@@ -137,8 +138,8 @@ function buildFlows() {
       });
 
       fid++;
-      lCursor[type.id]  += tL;
-      mCursor[type.id]  += tM;
+      lCursor[type.id]   += tL;
+      mCursor[type.id]   += tM;
       rCursor[link.club] += tR;
     });
   });
@@ -160,7 +161,7 @@ function ribbon(x1, y1, t1, x2, y2, t2) {
 }
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
-export default function RonaldoSankey() {
+export default function HarryKaneSankey() {
   const [hl,      setHl]      = useState(null);
   const [tooltip, setTooltip] = useState(null);
 
@@ -208,12 +209,12 @@ export default function RonaldoSankey() {
           {midSegs.map(s => (
             <rect key={s.typeId} x={MID_X} y={s.y} width={NODE_W} height={s.h} fill={s.color} opacity={0.95}/>
           ))}
-          <text x={MID_X + NODE_W/2} y={(MID_TOP+MID_BOT)/2 + 7} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={22} fontWeight={900} fill="#1a202c">971</text>
+          <text x={MID_X + NODE_W/2} y={(MID_TOP+MID_BOT)/2 + 7} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={22} fontWeight={900} fill="#1a202c">510</text>
           <text x={MID_X + NODE_W/2} y={(MID_TOP+MID_BOT)/2 + 22} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={9} fontWeight={600} fill="#718096" letterSpacing={1}>GOALS</text>
 
           {/* ── Header text ── */}
           <text x={W/2} y={22} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={10} fontWeight={600} fill="#a0aec0" letterSpacing={2}>CAREER STATISTICS · GOAL ANATOMY</text>
-          <text x={W/2} y={50} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={25} fontWeight={800} fill="#1a202c">Cristiano Ronaldo — 971 Career Goals</text>
+          <text x={W/2} y={50} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={25} fontWeight={800} fill="#1a202c">Harry Kane — 510 Career Goals</text>
           {[[LEFT_X, "GOAL TYPE"],[MID_X + NODE_W/2,"TOTAL"],[RIGHT_X + NODE_W/2,"CLUB / COUNTRY"]].map(([x,lbl]) => (
             <text key={lbl} x={x} y={72} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={10} fontWeight={600} fill="#b0bac8" letterSpacing={1.5}>{lbl}</text>
           ))}
@@ -283,7 +284,7 @@ export default function RonaldoSankey() {
       </div>
 
       <div style={{ marginTop: 14, fontSize: 10, color: "#c0c8d8", textAlign: "center" }}>
-        Data: messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026
+        Data: transfermarkt · soccergraph.com · as of May 2026
       </div>
     </div>
   );
