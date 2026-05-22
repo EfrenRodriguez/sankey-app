@@ -3,167 +3,167 @@
 import { useState } from "react";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
-// Source: messivsronaldo.app, transfermarkt, soccergraph.com (as of early 2026)
-// Flow: Goal Type → Club
-// Total: 900 goals
-
 const TYPES = [
-  {
-    id: "left",
-    label: "Left Foot",
-    emoji: "🦶",
-    total: 756,
-    color: "#4F86C6",
-    clubs: [
-      { name: "Barcelona",    value: 565 },
-      { name: "Argentina",    value: 95  },
-      { name: "Inter Miami",  value: 64  },
-      { name: "PSG",          value: 32  },
-    ],
-  },
-  {
-    id: "right",
-    label: "Right Foot",
-    emoji: "🦵",
-    total: 110,
-    color: "#E8A838",
-    clubs: [
-      { name: "Barcelona",    value: 78  },
-      { name: "Argentina",    value: 16  },
-      { name: "Inter Miami",  value: 13  },
-      { name: "PSG",          value: 3   },
-    ],
-  },
-  {
-    id: "header",
-    label: "Header",
-    emoji: "🤯",
-    total: 30,
-    color: "#5BAD8F",
-    clubs: [
-      { name: "Barcelona",    value: 24  },
-      { name: "Argentina",    value: 4   },
-      { name: "Inter Miami",  value: 2   },
-    ],
-  },
-  {
-    id: "penalty",
-    label: "Penalty",
-    emoji: "⚽",
-    total: 113,
-    color: "#C9625F",
-    clubs: [
-      { name: "Barcelona",    value: 77  },
-      { name: "Argentina",    value: 21  },
-      { name: "Inter Miami",  value: 12  },
-      { name: "PSG",          value: 3   },
-    ],
-  },
-  {
-    id: "freekick",
-    label: "Free Kick",
-    emoji: "🎯",
-    total: 62,
-    color: "#9B59B6",
-    clubs: [
-      { name: "Barcelona",    value: 46  },
-      { name: "Argentina",    value: 13  },
-      { name: "Inter Miami",  value: 2   },
-      { name: "PSG",          value: 1   },
-    ],
-  },
+  { id: "left",     label: "Left foot",  total: 756, pct: "84%", color: "#4F86C6" },
+  { id: "right",    label: "Right foot", total: 110, pct: "12%", color: "#E8A838" },
+  { id: "penalty",  label: "Penalty",    total: 113, pct: "13%", color: "#C9625F" },
+  { id: "header",   label: "Header",     total: 30,  pct: "3%",  color: "#5BAD8F" },
+  { id: "freekick", label: "Free kick",  total: 62,  pct: "7%",  color: "#9B59B6" },
 ];
-
-// Note: penalties & free kicks overlap with left/right foot in raw stats.
-// We treat them as a separate flow layer for storytelling — total shown is 900
-// but type totals intentionally overlap (penalty & freekick are subsets of foot goals).
-// For layout we use the non-overlapping view: Left(556) + Right(79) + Header(30) + Penalty(113) + FK(62) = ~840
-// We normalise to 900 for display.
 
 const CLUBS = [
-  { name: "Barcelona",   color: "#A50044", years: "2004–2021" },
-  { name: "Argentina",   color: "#74ACDF", years: "2005–present" },
-  { name: "Inter Miami", color: "#F7B5CD", years: "2023–present" },
-  { name: "PSG",         color: "#003370", years: "2021–2023" },
+  { name: "Barcelona",   goals: 672, color: "#A50044", tcolor: "#A50044", years: "2004–2021"    },
+  { name: "Argentina",   goals: 115, color: "#4A7FC1", tcolor: "#1a4f8a", years: "2005–present" },
+  { name: "Inter Miami", goals: 81,  color: "#E91E8C", tcolor: "#9a0f5e", years: "2023–present" },
+  { name: "PSG",         goals: 32,  color: "#003370", tcolor: "#003370", years: "2021–2023"    },
 ];
 
-const GRAND_TOTAL = 900;
+// How each type distributes across clubs (must sum to type.total)
+const LINKS = [
+  { type: "left",     club: "Barcelona",   value: 565 },
+  { type: "left",     club: "Argentina",   value: 95  },
+  { type: "left",     club: "Inter Miami", value: 64  },
+  { type: "left",     club: "PSG",         value: 32  },
+  { type: "right",    club: "Barcelona",   value: 78  },
+  { type: "right",    club: "Argentina",   value: 16  },
+  { type: "right",    club: "Inter Miami", value: 13  },
+  { type: "right",    club: "PSG",         value: 3   },
+  { type: "penalty",  club: "Barcelona",   value: 77  },
+  { type: "penalty",  club: "Argentina",   value: 21  },
+  { type: "penalty",  club: "Inter Miami", value: 12  },
+  { type: "penalty",  club: "PSG",         value: 3   },
+  { type: "header",   club: "Barcelona",   value: 24  },
+  { type: "header",   club: "Argentina",   value: 4   },
+  { type: "header",   club: "Inter Miami", value: 2   },
+  { type: "freekick", club: "Barcelona",   value: 46  },
+  { type: "freekick", club: "Argentina",   value: 13  },
+  { type: "freekick", club: "Inter Miami", value: 2   },
+  { type: "freekick", club: "PSG",         value: 1   },
+];
 
-// Club totals (from data above, sum across types)
-const clubTotals = {};
-CLUBS.forEach(c => clubTotals[c.name] = 0);
-TYPES.forEach(t => t.clubs.forEach(c => { clubTotals[c.name] = (clubTotals[c.name] || 0) + c.value; }));
+const TOTAL = 900;
 
-// For layout: left scales against type totals, right scales against club totals
-const LEFT_SCALE  = TYPES.reduce((s, t) => s + t.total, 0);   // ~1071 (overlapping)
-const RIGHT_SCALE = Object.values(clubTotals).reduce((s, v) => s + v, 0);
+// ─── LAYOUT ───────────────────────────────────────────────────────────────────
+const W       = 960;
+const H       = 540;
+const LEFT_X  = 155;   // left node right edge x
+const MID_X   = 480;   // center bar x
+const RIGHT_X = 810;   // right node left edge x
+const NODE_W  = 16;
+const PAD_T   = 88;
+const PAD_B   = 44;
+const AVAIL   = H - PAD_T - PAD_B;  // 408px available
 
-function fmt(v) { return Number.isInteger(v) ? String(v) : v.toFixed(1); }
+// Middle bar: compact, centred vertically — total height = 60% of available
+const MID_H     = AVAIL * 0.60;   // 245px
+const MID_TOP   = PAD_T + (AVAIL - MID_H) / 2;
+const MID_BOT   = MID_TOP + MID_H;
 
-// ─── LAYOUT ──────────────────────────────────────────────────────────────────
-const W        = 980;
-const H        = 600;
-const PAD_TOP  = 55;
-const GAP      = 8;
-const NODE_W   = 22;
-const USABLE_H = H - PAD_TOP - 50;
-
-const COL_TYPE_X = 190;
-const COL_MID_X  = W / 2 - NODE_W / 2;
-const COL_CLUB_X = W - 210 - NODE_W;
-
-function buildTypeNodes() {
-  let y = PAD_TOP;
+// Mid segments: stacked proportionally within MID_H
+const midSegs = (() => {
+  let y = MID_TOP;
   return TYPES.map(t => {
-    const h = (t.total / LEFT_SCALE) * USABLE_H;
-    const node = { ...t, x: COL_TYPE_X, y, h };
-    y += h + GAP;
+    const h = (t.total / TOTAL) * MID_H;
+    const seg = { typeId: t.id, color: t.color, y, h, cy: y + h / 2 };
+    y += h;
+    return seg;
+  });
+})();
+
+// Left nodes: spread across full AVAIL height with even gaps
+const L_GAP = 20;
+const lHeights = TYPES.map(t => Math.max(6, (t.total / TOTAL) * (AVAIL * 0.68)));
+const lTotal   = lHeights.reduce((s, h) => s + h, 0) + L_GAP * (TYPES.length - 1);
+const lNodes   = (() => {
+  let y = PAD_T + (AVAIL - lTotal) / 2;
+  return TYPES.map((t, i) => {
+    const h = lHeights[i];
+    const node = { ...t, y, h, cy: y + h / 2, x: LEFT_X };
+    y += h + L_GAP;
     return node;
   });
-}
+})();
 
-function buildClubNodes() {
-  let y = PAD_TOP;
-  return CLUBS.map(c => {
-    const total = clubTotals[c.name];
-    const h = (total / RIGHT_SCALE) * USABLE_H;
-    const node = { ...c, total, x: COL_CLUB_X, y, h };
-    y += h + GAP;
+// Right nodes: spread across full AVAIL height with generous gaps
+const R_GAP = 28;
+const rHeights = CLUBS.map(c => Math.max(16, (c.goals / TOTAL) * (AVAIL * 0.72)));
+const rTotal   = rHeights.reduce((s, h) => s + h, 0) + R_GAP * (CLUBS.length - 1);
+const rNodes   = (() => {
+  let y = PAD_T + (AVAIL - rTotal) / 2;
+  return CLUBS.map((c, i) => {
+    const h = rHeights[i];
+    const node = { ...c, y, h, cy: y + h / 2, x: RIGHT_X };
+    y += h + R_GAP;
     return node;
   });
-}
+})();
 
-function buildFlows(typeNodes, clubNodes) {
-  const typeBands = {};
-  typeNodes.forEach(t => { typeBands[t.id] = { y: t.y, h: t.h, cursor: t.y }; });
-  const clubCursors = {};
-  clubNodes.forEach(c => { clubCursors[c.name] = c.y; });
+// ─── FLOWS ────────────────────────────────────────────────────────────────────
+// Each link produces two ribbons:
+//   Left ribbon:  left node  → mid bar  (type color)
+//   Right ribbon: mid bar    → right node (club color)
+// We track cursors inside each left node, mid seg, and right node.
 
-  const flows = [];
-  clubNodes.forEach(club => {
-    TYPES.forEach(type => {
-      const match = type.clubs.find(c => c.name === club.name);
-      if (!match) return;
-      const band   = typeBands[type.id];
-      const t_left  = (match.value / type.total) * band.h;
-      const t_right = (match.value / RIGHT_SCALE) * USABLE_H;
-      flows.push({
-        typeId: type.id, clubName: club.name,
-        typeColor: type.color, clubColor: club.color,
-        value: match.value,
-        x1: COL_TYPE_X + NODE_W, y1: band.cursor + t_left / 2,  t1: t_left,
-        x2: COL_MID_X,           y2: band.cursor + t_left / 2,  t2: t_left,
-        x3: COL_MID_X + NODE_W,  y3: band.cursor + t_left / 2,  t3: t_left,
-        x4: COL_CLUB_X,          y4: clubCursors[club.name] + t_right / 2, t4: t_right,
+function buildFlows() {
+  // Cursors: where the next ribbon starts inside each node
+  const lCursor  = {};  lNodes.forEach(n => { lCursor[n.id]   = n.y; });
+  const mCursor  = {};  midSegs.forEach(s => { mCursor[s.typeId] = s.y; });
+  const rCursor  = {};  rNodes.forEach(n => { rCursor[n.name]  = n.y; });
+
+  const leftFlows  = [];
+  const rightFlows = [];
+  let fid = 0;
+
+  // Process links grouped by type so mid-seg cursor advances cleanly
+  TYPES.forEach(type => {
+    const typeLinks = LINKS.filter(l => l.type === type.id);
+    const lNode  = lNodes.find(n => n.id === type.id);
+    const midSeg = midSegs.find(s => s.typeId === type.id);
+
+    typeLinks.forEach(link => {
+      const rNode = rNodes.find(n => n.name === link.club);
+      if (!rNode) return;
+
+      // Thickness on each side proportional to value
+      const tL = Math.max(1.5, (link.value / TOTAL) * (AVAIL * 0.68));  // left scale
+      const tM = (link.value / type.total) * midSeg.h;                   // mid scale
+      const tR = Math.max(1.5, (link.value / TOTAL) * (AVAIL * 0.72));  // right scale
+
+      // Left flow: left node cy slice → mid seg cursor slice
+      const lCy = lCursor[type.id] + tL / 2;
+      const mCyL = mCursor[type.id] + tM / 2;
+      leftFlows.push({
+        id: `lf${fid}`,
+        typeId: type.id, club: link.club,
+        color: type.color,
+        x1: lNode.x, y1: lCy, t1: tL,
+        x2: MID_X,   y2: mCyL, t2: tM,
       });
-      band.cursor            += t_left;
-      clubCursors[club.name] += t_right;
+
+      // Right flow: mid seg cursor slice → right node cursor slice
+      const mCyR = mCursor[type.id];  // same position in mid seg
+      const rCy  = rCursor[link.club] + tR / 2;
+      rightFlows.push({
+        id: `rf${fid}`,
+        typeId: type.id, club: link.club,
+        color: rNode.color,
+        x1: MID_X + NODE_W, y1: mCyL, t1: tM,
+        x2: rNode.x,        y2: rCy,  t2: tR,
+      });
+
+      fid++;
+      lCursor[type.id]  += tL;
+      mCursor[type.id]  += tM;
+      rCursor[link.club] += tR;
     });
   });
-  return flows;
+
+  return { leftFlows, rightFlows };
 }
 
-function bezier(x1, y1, t1, x2, y2, t2) {
+const { leftFlows, rightFlows } = buildFlows();
+
+function ribbon(x1, y1, t1, x2, y2, t2) {
   const cx = (x1 + x2) / 2;
   return [
     `M${x1},${y1 - t1/2}`,
@@ -174,216 +174,131 @@ function bezier(x1, y1, t1, x2, y2, t2) {
   ].join(" ");
 }
 
-// ─── COMPONENT ───────────────────────────────────────────────────────────────
+// ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function MessiSankey() {
-  const [tooltip,     setTooltip]     = useState(null);
-  const [highlighted, setHighlighted] = useState(null);
+  const [hl,      setHl]      = useState(null);
+  const [tooltip, setTooltip] = useState(null);
 
-  const typeNodes = buildTypeNodes();
-  const clubNodes = buildClubNodes();
-  const flows     = buildFlows(typeNodes, clubNodes);
-
-  function flowOpacity(typeId, clubName) {
-    if (!highlighted) return 0.30;
-    if (highlighted.type === "type") return highlighted.id === typeId   ? 0.60 : 0.04;
-    if (highlighted.type === "club") return highlighted.id === clubName ? 0.60 : 0.04;
+  function lOpacity(typeId, club) {
+    if (!hl) return 0.30;
+    if (hl.kind === "type") return hl.id === typeId ? 0.65 : 0.04;
+    if (hl.kind === "club") return hl.id === club   ? 0.65 : 0.04;
     return 0.30;
   }
 
   return (
     <div style={{
-      background: "#f7f8fa",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+      background: "#f4f5f7", minHeight: "100vh",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      fontFamily: "'Inter','Helvetica Neue',sans-serif",
       padding: "28px 12px",
     }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        .s-flow { transition: opacity 0.15s ease; }
-        .s-node { cursor: pointer; }
-      `}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');`}</style>
 
-      {/* Header */}
-      <div style={{ marginBottom: 4, textAlign: "center" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "#a0aec0", letterSpacing: 3, marginBottom: 6 }}>
-          CAREER STATISTICS · GOAL ANATOMY
-        </div>
-        <div style={{ fontSize: 28, fontWeight: 900, color: "#1a202c", letterSpacing: -1 }}>
-          Lionel Messi
-        </div>
-        <div style={{ fontSize: 13, color: "#718096", marginTop: 4 }}>
-          <strong style={{ color: "#1a202c", fontSize: 20 }}>900</strong> career goals ·
-          Barcelona · PSG · Inter Miami · Argentina · hover to explore
-        </div>
-      </div>
+      <div style={{ position: "relative", width: "100%", maxWidth: W, background: "#fff", borderRadius: 20, boxShadow: "0 2px 40px rgba(0,0,0,0.09)" }}>
+        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", width: "100%", overflow: "visible" }}>
 
-      {/* Stat pills */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 20, marginTop: 12, flexWrap: "wrap", justifyContent: "center" }}>
-        {[
-          { label: "Left Foot", value: "84%", color: "#4F86C6" },
-          { label: "Right Foot", value: "12%", color: "#E8A838" },
-          { label: "Headers", value: "3%", color: "#5BAD8F" },
-          { label: "Penalties", value: "113", color: "#C9625F" },
-          { label: "Free Kicks", value: "62", color: "#9B59B6" },
-        ].map(p => (
-          <div key={p.label} style={{
-            background: "#fff", border: `2px solid ${p.color}20`,
-            borderRadius: 20, padding: "5px 14px",
-            display: "flex", alignItems: "center", gap: 7,
-            boxShadow: "0 1px 4px rgba(0,0,0,0.06)"
-          }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color }} />
-            <span style={{ fontSize: 11, color: "#718096", fontWeight: 500 }}>{p.label}</span>
-            <span style={{ fontSize: 13, color: "#1a202c", fontWeight: 700 }}>{p.value}</span>
-          </div>
-        ))}
-      </div>
+          <rect width={W} height={H} fill="#fff" rx="20"/>
 
-      <div style={{
-        position: "relative", width: "100%", maxWidth: W,
-        background: "#fff", borderRadius: 20,
-        boxShadow: "0 2px 32px rgba(0,0,0,0.08)", padding: "28px 0 20px",
-      }}>
-        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}
-          style={{ display: "block", width: "100%", overflow: "visible" }}>
-
-          {/* Column headers */}
-          {[
-            [COL_TYPE_X + NODE_W/2, "GOAL TYPE"],
-            [COL_MID_X + NODE_W/2, "900 GOALS"],
-            [COL_CLUB_X + NODE_W/2, "CLUB / COUNTRY"],
-          ].map(([x, lbl]) => (
-            <text key={lbl} x={x} y={PAD_TOP - 16} textAnchor="middle"
-              fill="#a0aec0" fontSize={10} fontWeight={600} letterSpacing={1.5} fontFamily="Inter">
-              {lbl}
-            </text>
+          {/* ── Left flows ── */}
+          {leftFlows.map(f => (
+            <path key={f.id} d={ribbon(f.x1, f.y1, f.t1, f.x2, f.y2, f.t2)}
+              fill={f.color} opacity={lOpacity(f.typeId, f.club)}
+              style={{ transition: "opacity 0.15s" }}
+              onMouseEnter={e => { setHl({ kind: "type", id: f.typeId }); setTooltip({ x: e.clientX, y: e.clientY, typeId: f.typeId, club: f.club }); }}
+              onMouseLeave={() => { setHl(null); setTooltip(null); }}/>
           ))}
 
-          {/* Flows type → mid */}
-          {flows.map((f, i) => (
-            <path key={`lf${i}`} className="s-flow"
-              d={bezier(f.x1, f.y1, f.t1, f.x2, f.y2, f.t2)}
-              fill={f.typeColor}
-              opacity={flowOpacity(f.typeId, f.clubName)}
-              onMouseEnter={e => setTooltip({ x: e.clientX, y: e.clientY, ...f })}
-              onMouseLeave={() => setTooltip(null)}
-            />
+          {/* ── Right flows ── */}
+          {rightFlows.map(f => (
+            <path key={f.id} d={ribbon(f.x1, f.y1, f.t1, f.x2, f.y2, f.t2)}
+              fill={f.color} opacity={lOpacity(f.typeId, f.club)}
+              style={{ transition: "opacity 0.15s" }}
+              onMouseEnter={e => { setHl({ kind: "club", id: f.club }); setTooltip({ x: e.clientX, y: e.clientY, typeId: f.typeId, club: f.club }); }}
+              onMouseLeave={() => { setHl(null); setTooltip(null); }}/>
           ))}
 
-          {/* Flows mid → club */}
-          {flows.map((f, i) => (
-            <path key={`rf${i}`} className="s-flow"
-              d={bezier(f.x3, f.y3, f.t3, f.x4, f.y4, f.t4)}
-              fill={f.clubColor}
-              opacity={flowOpacity(f.typeId, f.clubName)}
-              onMouseEnter={e => setTooltip({ x: e.clientX, y: e.clientY, ...f })}
-              onMouseLeave={() => setTooltip(null)}
-            />
+          {/* ── Mid bar: continuous stacked ── */}
+          {midSegs.map(s => (
+            <rect key={s.typeId} x={MID_X} y={s.y} width={NODE_W} height={s.h} fill={s.color} opacity={0.95}/>
+          ))}
+          <text x={MID_X + NODE_W/2} y={(MID_TOP+MID_BOT)/2 + 7} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={22} fontWeight={900} fill="#1a202c">900</text>
+          <text x={MID_X + NODE_W/2} y={(MID_TOP+MID_BOT)/2 + 22} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={9} fontWeight={600} fill="#718096" letterSpacing={1}>GOALS</text>
+
+          {/* ── Header text ── */}
+          <text x={W/2} y={22} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={10} fontWeight={600} fill="#a0aec0" letterSpacing={2}>CAREER STATISTICS · GOAL ANATOMY</text>
+          <text x={W/2} y={50} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={25} fontWeight={800} fill="#1a202c">Lionel Messi — 900 Career Goals</text>
+          {[[LEFT_X, "GOAL TYPE"],[MID_X + NODE_W/2,"TOTAL"],[RIGHT_X + NODE_W/2,"CLUB / COUNTRY"]].map(([x,lbl]) => (
+            <text key={lbl} x={x} y={72} textAnchor="middle" fontFamily="Inter,sans-serif" fontSize={10} fontWeight={600} fill="#b0bac8" letterSpacing={1.5}>{lbl}</text>
           ))}
 
-          {/* Mid node — segmented by type */}
-          {typeNodes.map(t => (
-            <rect key={t.id} x={COL_MID_X} y={t.y} width={NODE_W} height={t.h}
-              fill={t.color} opacity={0.85} />
-          ))}
-          <text x={COL_MID_X + NODE_W/2} y={PAD_TOP + USABLE_H/2 - 12}
-            textAnchor="middle" fill="#1a202c" fontSize={20} fontWeight={900} fontFamily="Inter">
-            900
-          </text>
-          <text x={COL_MID_X + NODE_W/2} y={PAD_TOP + USABLE_H/2 + 6}
-            textAnchor="middle" fill="#718096" fontSize={9} fontWeight={600} fontFamily="Inter" letterSpacing={1}>
-            GOALS
-          </text>
-
-          {/* Type nodes */}
-          {typeNodes.map(t => (
-            <g key={t.id} className="s-node"
-              onMouseEnter={() => setHighlighted({ type: "type", id: t.id })}
-              onMouseLeave={() => setHighlighted(null)}>
+          {/* ── Left nodes ── */}
+          {lNodes.map(t => (
+            <g key={t.id} style={{ cursor: "pointer" }}
+              onMouseEnter={() => setHl({ kind: "type", id: t.id })}
+              onMouseLeave={() => setHl(null)}>
               <rect x={t.x} y={t.y} width={NODE_W} height={t.h} fill={t.color} rx={3}
-                opacity={highlighted?.type === "type" && highlighted.id !== t.id ? 0.2 : 1} />
-              <text x={t.x - 12} y={t.y + t.h/2 - 8} textAnchor="end"
-                fill={t.color} fontSize={12} fontWeight={700} fontFamily="Inter">
-                {t.emoji} {t.label}
-              </text>
-              <text x={t.x - 12} y={t.y + t.h/2 + 8} textAnchor="end"
-                fill="#1a202c" fontSize={14} fontWeight={800} fontFamily="Inter">
-                {t.total}
-              </text>
-              <text x={t.x - 12} y={t.y + t.h/2 + 22} textAnchor="end"
-                fill="#a0aec0" fontSize={10} fontFamily="Inter">
-                {Math.round(t.total / GRAND_TOTAL * 100)}% of career
-              </text>
+                opacity={hl?.kind === "type" && hl.id !== t.id ? 0.18 : 1}/>
+              <text x={t.x - 14} y={t.cy - 10} textAnchor="end" fontFamily="Inter,sans-serif" fontSize={14} fontWeight={700} fill={t.color}>{t.label}</text>
+              <text x={t.x - 14} y={t.cy + 9}  textAnchor="end" fontFamily="Inter,sans-serif" fontSize={22} fontWeight={800} fill="#1a202c">{t.total}</text>
+              <text x={t.x - 14} y={t.cy + 24} textAnchor="end" fontFamily="Inter,sans-serif" fontSize={11} fill="#b0bac8">{t.pct} of goals</text>
             </g>
           ))}
 
-          {/* Club nodes */}
-          {clubNodes.map(c => (
-            <g key={c.name} className="s-node"
-              onMouseEnter={() => setHighlighted({ type: "club", id: c.name })}
-              onMouseLeave={() => setHighlighted(null)}>
-              {/* Segmented by type color */}
-              {(() => {
-                let sy = c.y;
-                return TYPES.map(t => {
-                  const match = t.clubs.find(x => x.name === c.name);
-                  if (!match) return null;
-                  const sh = (match.value / RIGHT_SCALE) * USABLE_H;
-                  const el = (
-                    <rect key={t.id} x={c.x} y={sy} width={NODE_W} height={sh}
-                      fill={t.color}
-                      opacity={highlighted?.type === "club" && highlighted.id !== c.name ? 0.2 : 0.9} />
-                  );
-                  sy += sh;
-                  return el;
-                });
-              })()}
-              <text x={c.x + NODE_W + 12} y={c.y + c.h/2 - 12} textAnchor="start"
-                fill={c.color} fontSize={13} fontWeight={800} fontFamily="Inter">
-                {c.name}
-              </text>
-              <text x={c.x + NODE_W + 12} y={c.y + c.h/2 + 4} textAnchor="start"
-                fill="#718096" fontSize={10} fontFamily="Inter">
-                {c.years}
-              </text>
-              <text x={c.x + NODE_W + 12} y={c.y + c.h/2 + 18} textAnchor="start"
-                fill="#1a202c" fontSize={14} fontWeight={800} fontFamily="Inter">
-                {fmt(c.total)} goals
-              </text>
+          {/* ── Right nodes ── */}
+          {rNodes.map(c => (
+            <g key={c.name} style={{ cursor: "pointer" }}
+              onMouseEnter={() => setHl({ kind: "club", id: c.name })}
+              onMouseLeave={() => setHl(null)}>
+              <rect x={c.x} y={c.y} width={NODE_W} height={c.h} fill={c.color} rx={3}
+                opacity={hl?.kind === "club" && hl.id !== c.name ? 0.15 : 1}/>
+              <text x={c.x + NODE_W + 14} y={c.cy - 9}  textAnchor="start" fontFamily="Inter,sans-serif" fontSize={15} fontWeight={800} fill={c.tcolor || c.color}
+                opacity={hl?.kind === "club" && hl.id !== c.name ? 0.2 : 1}>{c.name}</text>
+              <text x={c.x + NODE_W + 14} y={c.cy + 6}  textAnchor="start" fontFamily="Inter,sans-serif" fontSize={11} fill="#a0aec0"
+                opacity={hl?.kind === "club" && hl.id !== c.name ? 0.2 : 1}>{c.years}</text>
+              <text x={c.x + NODE_W + 14} y={c.cy + 23} textAnchor="start" fontFamily="Inter,sans-serif" fontSize={17} fontWeight={800} fill="#1a202c"
+                opacity={hl?.kind === "club" && hl.id !== c.name ? 0.2 : 1}>{c.goals} goals</text>
+            </g>
+          ))}
+
+          {/* ── Legend ── */}
+          {TYPES.map((t, i) => (
+            <g key={t.id}>
+              <rect x={148 + i * 150} y={H - 22} width={10} height={10} fill={t.color} rx={2}/>
+              <text x={163 + i * 150} y={H - 12} fontFamily="Inter,sans-serif" fontSize={11} fill="#718096">{t.label}</text>
             </g>
           ))}
         </svg>
 
-        {tooltip && (
-          <div style={{
-            position: "fixed", left: tooltip.x + 14, top: tooltip.y - 14,
-            background: "#fff", border: `2px solid ${tooltip.typeColor}`,
-            borderRadius: 10, padding: "10px 16px",
-            fontFamily: "Inter", pointerEvents: "none", zIndex: 200,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.14)", whiteSpace: "nowrap",
-          }}>
-            <div style={{ fontSize: 10, color: "#a0aec0", fontWeight: 600, letterSpacing: 0.5, marginBottom: 3 }}>
-              {TYPES.find(t => t.id === tooltip.typeId)?.emoji} {tooltip.typeId.toUpperCase()} → {tooltip.clubName.toUpperCase()}
+        {tooltip && (() => {
+          const type = TYPES.find(t => t.id === tooltip.typeId);
+          const link = LINKS.find(l => l.type === tooltip.typeId && l.club === tooltip.club);
+          return (
+            <div style={{
+              position: "fixed", left: tooltip.x + 16, top: tooltip.y - 16,
+              background: "#fff", border: `2px solid ${type?.color}`,
+              borderRadius: 10, padding: "10px 16px",
+              fontFamily: "Inter,sans-serif", pointerEvents: "none", zIndex: 300,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.13)", whiteSpace: "nowrap",
+            }}>
+              <div style={{ fontSize: 10, color: "#a0aec0", fontWeight: 600, letterSpacing: 0.5, marginBottom: 3 }}>
+                {type?.label.toUpperCase()} → {tooltip.club.toUpperCase()}
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: type?.color }}>
+                {link?.value ?? "—"}
+                <span style={{ fontSize: 12, color: "#718096", marginLeft: 6, fontWeight: 500 }}>goals</span>
+              </div>
+              <div style={{ fontSize: 11, color: "#a0aec0", marginTop: 2 }}>
+                {link ? Math.round(link.value / TOTAL * 100) : 0}% of career total
+              </div>
             </div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: tooltip.typeColor }}>
-              {fmt(tooltip.value)}
-              <span style={{ fontSize: 12, color: "#718096", marginLeft: 6, fontWeight: 500 }}>goals</span>
-            </div>
-            <div style={{ fontSize: 11, color: "#a0aec0", marginTop: 3 }}>
-              {Math.round(tooltip.value / GRAND_TOTAL * 100)}% of career total
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
-      {/* Footer note */}
-      <div style={{ marginTop: 14, fontSize: 10, color: "#c0c8d8", textAlign: "center", fontFamily: "Inter" }}>
-        Data: messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026 ·
-        Penalty & free kick goals overlap with foot totals
+      <div style={{ marginTop: 14, fontSize: 10, color: "#c0c8d8", textAlign: "center" }}>
+        Data: messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026
       </div>
     </div>
   );
