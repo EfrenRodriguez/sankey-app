@@ -1,5 +1,5 @@
-import MessiSankey from "./components/MessiSankey";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <MessiSankey />;
+  redirect("/messi");
 }
