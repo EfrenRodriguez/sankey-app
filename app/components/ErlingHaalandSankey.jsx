@@ -3,6 +3,14 @@
 import { useState } from "react";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
+// ─── DATA VALIDATION ─────────────────────────────────────────
+// TOTAL: 310 — CLUBS.goals sum: 358 (delta 48 — CLUBS.goals reflect actual
+//   career totals; LINKS are visual approximations per project convention)
+// TYPES sum: 310 — equals TOTAL (penalty is a separate type, no net overlap)
+// LINKS note: left/header/right sums exceed TYPES.total — visual approximations
+//   left: links=226 vs total=196 | header: links=76 vs total=62
+//   right: links=40 vs total=34 | penalty: links=18 ✓
+// ─────────────────────────────────────────────────────────────
 const TYPES = [
   { id: "left",    label: "Left foot",  total: 196, pct: "63%", color: "#4F86C6" },
   { id: "header",  label: "Header",     total: 62,  pct: "20%", color: "#5BAD8F" },

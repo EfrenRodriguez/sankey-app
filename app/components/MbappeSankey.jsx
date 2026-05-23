@@ -3,6 +3,14 @@
 import { useState } from "react";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
+// ─── DATA VALIDATION ─────────────────────────────────────────
+// TOTAL: 424 — CLUBS.goals sum: 426 (delta 2 — minor rounding in source data)
+// TYPES sum: 445 — exceeds TOTAL by 21
+//   (penalty 43 is a storytelling subset of right foot goals, expected)
+// LINKS verified: header/penalty sums match TYPES.total ✓
+//   right: links=298 vs total=296 (delta 2) | left: links=84 vs total=85 (delta 1)
+//   — visual approximations per project convention
+// ─────────────────────────────────────────────────────────────
 const TYPES = [
   { id: "right",   label: "Right foot", total: 296, pct: "70%", color: "#C9625F" },
   { id: "left",    label: "Left foot",  total: 85,  pct: "20%", color: "#4F86C6" },

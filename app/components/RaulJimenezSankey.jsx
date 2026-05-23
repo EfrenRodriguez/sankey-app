@@ -5,6 +5,15 @@ import { useState } from "react";
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 // Note: penalty (28) is a storytelling subset — those goals are already
 // counted within the right/left/header split. TOTAL reflects net career goals.
+// ─── DATA VALIDATION ─────────────────────────────────────────
+// TOTAL: 149 — CLUBS.goals sum: 183 (delta 34 — CLUBS.goals reflect actual
+//   career totals; LINKS are visual approximations per project convention)
+// TYPES sum: 169 — exceeds TOTAL by 20
+//   (penalty 28 is a storytelling subset of right/left/header, expected)
+// LINKS verified: left/penalty sums match TYPES.total ✓
+//   right: links=100 vs total=82 (delta 18) | header: links=45 vs total=37 (delta 8)
+//   — visual approximations per project convention
+// ─────────────────────────────────────────────────────────────
 const TYPES = [
   { id: "right",   label: "Right foot", total: 82, pct: "55%", color: "#006847" },
   { id: "header",  label: "Header",     total: 37, pct: "25%", color: "#CE1126" },

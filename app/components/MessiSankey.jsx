@@ -3,6 +3,12 @@
 import { useState } from "react";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
+// ─── DATA VALIDATION ─────────────────────────────────────────
+// TOTAL: 900 — matches sum of CLUBS.goals (900) ✓
+// TYPES sum: 1071 — exceeds TOTAL by 171
+//   (penalty 113 + freekick 62 are storytelling subsets, expected)
+// LINKS verified: all type sums match TYPES.total ✓
+// ─────────────────────────────────────────────────────────────
 const TYPES = [
   { id: "left",     label: "Left foot",  total: 756, pct: "84%", color: "#4F86C6" },
   { id: "right",    label: "Right foot", total: 110, pct: "12%", color: "#E8A838" },
