@@ -1,15 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { Analytics } from "@vercel/analytics/react";
+import NavBar from "./components/NavBar";
 import "./globals.css";
-
-const PLAYERS = [
-  { name: "Messi",    href: "/"         },
-  { name: "Cristiano Ronaldo",  href: "/ronaldo"  },
-  { name: "Haaland",  href: "/haaland"  },
-  { name: "Mbappé",   href: "/mbappe"   },
-  { name: "Jiménez",  href: "/jimenez"  },
-  { name: "Kane",     href: "/kane"     },
-];
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,45 +25,9 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <style>{`
-          .nav-link {
-            font-size: 13px; font-weight: 600; color: #4a5568;
-            padding: 6px 14px; border-radius: 8px; text-decoration: none;
-            transition: background 0.12s, color 0.12s;
-            flex-shrink: 0;
-          }
-          .nav-link:hover { background: #f4f5f7; color: #1a202c; }
-          .nav-scroll::-webkit-scrollbar { display: none; }
-          .nav-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        `}</style>
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000,
-          background: "rgba(255,255,255,0.90)", backdropFilter: "blur(10px)",
-          borderBottom: "1px solid #e8eaed", height: 48,
-        }}>
-          {/* Fade hint on the right edge — signals more content is scrollable */}
-          <div style={{
-            position: "absolute", top: 0, right: 0, width: 48, height: "100%",
-            background: "linear-gradient(to right, transparent, rgba(255,255,255,0.95))",
-            pointerEvents: "none", zIndex: 1,
-          }}/>
-          <nav className="nav-scroll" style={{
-            display: "flex", alignItems: "center", gap: 4,
-            padding: "0 24px", height: "100%",
-            fontFamily: "'Inter','Helvetica Neue',sans-serif",
-            overflowX: "auto",
-          }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#b0bac8", letterSpacing: 2, marginRight: 12, flexShrink: 0 }}>
-              GOAL ANATOMY
-            </span>
-            {PLAYERS.map(p => (
-              <Link key={p.href} href={p.href} className="nav-link">
-                {p.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
+        <NavBar />
         <div style={{ paddingTop: 48 }}>{children}</div>
+        <Analytics />
       </body>
     </html>
   );
