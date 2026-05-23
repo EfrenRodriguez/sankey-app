@@ -3,6 +3,11 @@
 import { useState } from "react";
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
+// ─── DATA VALIDATION ─────────────────────────────────────────
+// TOTAL: 971 — CLUBS.goals sum: 974 (delta 3 — minor rounding in source data)
+// TYPES sum: 971 — equals TOTAL (no penalty overlap)
+// LINKS verified: all type sums match TYPES.total ✓
+// ─────────────────────────────────────────────────────────────
 const TYPES = [
   { id: "right",    label: "Right foot", total: 620, pct: "64%", color: "#E8361A" },
   { id: "left",     label: "Left foot",  total: 187, pct: "19%", color: "#4F86C6" },

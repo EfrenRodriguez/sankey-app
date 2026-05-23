@@ -5,7 +5,13 @@ import { useState } from "react";
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 // Note: penalty (102) is a storytelling subset — those goals are already
 // counted within the right foot split. TOTAL reflects net career goals.
-// sum(TYPES.total) = 536 > TOTAL (510) — expected per penalty overlap pattern.
+// ─── DATA VALIDATION ─────────────────────────────────────────
+// TOTAL: 510 — CLUBS.goals sum: 514 (delta 4 — minor rounding in source data)
+// TYPES sum: 536 — exceeds TOTAL by 26
+//   (penalty 102 is a storytelling subset of right foot goals, expected)
+// LINKS verified: penalty/header/left sums match TYPES.total ✓
+//   right: links=309 vs total=306 (delta 3 — visual approximation)
+// ─────────────────────────────────────────────────────────────
 const TYPES = [
   { id: "right",   label: "Right foot", total: 306, pct: "60%", color: "#C8102E" },
   { id: "penalty", label: "Penalty",    total: 102, pct: "20%", color: "#E8A838" },

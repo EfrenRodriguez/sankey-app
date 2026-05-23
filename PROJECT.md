@@ -145,3 +145,84 @@ or when penalties represent a defining characteristic of their style
 ## Key layout constants (keep consistent across players)
 W=960, H=540, LEFT_X=155, MID_X=480, RIGHT_X=810, NODE_W=16
 L_GAP=20, R_GAP=28, MID_H = AVAIL * 0.60
+
+## Diagram JSON specification (v2)
+
+This is the canonical data contract between the data processor and the visualizer.
+All fields except `meta`, `nodes`, and `links` are optional.
+The schema is fully backwards compatible — omitted optional fields use defaults.
+
+```json
+{
+  "meta": {
+    "title": "string — main diagram title",
+    "subtitle": "string — secondary line below title (optional)",
+    "subject": "string — e.g. player name, company name (optional)",
+    "total": "number — grand total value",
+    "unit": "string — e.g. 'goals', '$B', 'HC'",
+    "source": "string — data attribution (optional)",
+    "theme": "light | dark — defaults to light"
+  },
+  "columns": [
+    {
+      "id": "string — unique column identifier",
+      "label": "string — column header label",
+      "index": "number — left-to-right order starting at 0"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "string — unique node identifier",
+      "column": "string — references a columns[].id",
+      "label": "string — display name",
+      "value": "number — total flow through this node",
+      "color": "string — hex color (optional, auto-assigned if omitted)",
+      "meta": "string — secondary annotation e.g. '+85% Y/Y' (optional)",
+      "type": "neutral | aggregate | cost | loss — defaults to neutral"
+    }
+  ],
+  "links": [
+    {
+      "from": "string — references a nodes[].id",
+      "to": "string — references a nodes[].id",
+      "value": "number — flow magnitude",
+      "type": "neutral | profit | cost | loss — defaults to neutral"
+    }
+  ]
+}
+```
+
+### Node types
+- `neutral` — standard flow node (default, used in all current diagrams)
+- `aggregate` — calculated node, result of combining upstream flows (e.g. Total Revenue, Gross Profit)
+- `cost` — negative/expense node, renders with cost color (e.g. red tones)
+- `loss` — flow that exits the system entirely (e.g. waste heat, tax leakage, writeoffs)
+
+### Link types
+- `neutral` — standard flow (default)
+- `profit` — positive outcome flow, renders in node's color
+- `cost` — expense flow, renders in cost color
+- `loss` — flow exiting the system, renders as drain
+
+### Validation rules
+- Every `links[].from` and `links[].to` must reference a valid `nodes[].id`
+- Every `nodes[].column` must reference a valid `columns[].id` (when columns are defined)
+- `TOTAL` must equal sum of all right-side node values
+- When penalties are broken out as a separate type (Jiménez pattern):
+  `sum(TYPES.total)` will exceed `TOTAL` — this is expected and must be
+  documented with a comment in the component file
+- All `links` values for a given source node must sum to that node's `value`
+
+## Edge cases
+
+### Penalty overlap (Jiménez / Kane pattern)
+Penalties are broken out as a separate TYPES entry for storytelling purposes
+even though they are physically scored with a foot.
+- TOTAL = sum of CLUBS.goals (net unique goals, not sum of TYPES)
+- Penalty values in LINKS are NOT additive to right/left foot values
+- Apply this pattern when a player scores 15+ career penalties or when
+  penalties are a defining characteristic of their style
+
+### When to use columns[]
+Only needed for Tier 2+ diagrams (4+ columns, income statements, energy flows).
+Soccer diagrams use the simplified 3-column layout hardcoded in the component.
