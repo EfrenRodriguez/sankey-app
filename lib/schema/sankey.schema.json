@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sankey-app.vercel.app/schema/sankey.v2.json",
+  "title": "SankeyDiagram",
+  "description": "Canonical v2 schema for a Goal Anatomy Sankey diagram.",
+  "type": "object",
+  "required": ["meta", "columns", "nodes", "links"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["player", "total", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "player":      { "type": "string",  "description": "Full player name, e.g. 'Lionel Messi'" },
+        "total":       { "type": "integer", "minimum": 1, "description": "Net career goals (= sum of clubs[].goals)" },
+        "unit":        { "type": "string",  "enum": ["goals"], "description": "Unit label shown in the diagram" },
+        "description": { "type": "string",  "description": "Optional subtitle / data-source note" }
+      }
+    },
+    "columns": {
+      "type": "array",
+      "description": "Ordered column definitions. Typically ['clubs', 'types'] or ['clubs', 'body_part', 'situation'].",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "id":    { "type": "string", "description": "Machine identifier referenced by nodes[].column" },
+          "label": { "type": "string", "description": "Human-readable column header" }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "description": "All nodes rendered in the diagram. Order within a column determines vertical stacking (top → bottom).",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "column", "label", "value"],
+        "additionalProperties": false,
+        "properties": {
+          "id":      { "type": "string",  "description": "Unique node identifier used in links[]" },
+          "column":  { "type": "string",  "description": "References columns[].id" },
+          "label":   { "type": "string",  "description": "Display label for the node" },
+          "value":   { "type": "number",  "minimum": 0, "description": "Quantity this node represents" },
+          "color":   { "type": "string",  "description": "Optional hex or CSS color override" },
+          "overlap": {
+            "type": "boolean",
+            "default": false,
+            "description": "True when this node is a storytelling subset already counted in another node (penalty overlap pattern). Overlap nodes do not add to column totals."
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "description": "Flows between nodes. source and target must reference nodes[].id.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "value"],
+        "additionalProperties": false,
+        "properties": {
+          "source": { "type": "string", "description": "Source node id" },
+          "target": { "type": "string", "description": "Target node id" },
+          "value":  { "type": "number", "minimum": 0, "description": "Flow magnitude" },
+          "color":  { "type": "string", "description": "Optional per-link color override" }
+        }
+      }
+    }
+  }
+}
