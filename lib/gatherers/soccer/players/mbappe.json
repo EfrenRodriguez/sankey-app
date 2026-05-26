@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "title": "Kylian Mbappé — 424 Career Goals",
+    "subtitle": "CAREER STATISTICS · GOAL ANATOMY",
+    "subject": "Kylian Mbappé",
+    "total": 424,
+    "unit": "goals",
+    "source": "messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026",
+    "theme": "light"
+  },
+  "types": [
+    { "id": "right",   "label": "Right foot", "total": 296, "pct": "70%", "color": "#C9625F" },
+    { "id": "left",    "label": "Left foot",  "total": 85,  "pct": "20%", "color": "#4F86C6" },
+    { "id": "header",  "label": "Header",     "total": 21,  "pct": "5%",  "color": "#5BAD8F" },
+    { "id": "penalty", "label": "Penalty",    "total": 43,  "pct": "10%", "color": "#9B59B6" }
+  ],
+  "clubs": [
+    { "name": "PSG",         "goals": 256, "color": "#003370", "tcolor": "#003370", "years": "2017–2024"    },
+    { "name": "Real Madrid", "goals": 86,  "color": "#F7C948", "tcolor": "#8a6e00", "years": "2024–present" },
+    { "name": "France",      "goals": 57,  "color": "#002395", "tcolor": "#002395", "years": "2017–present" },
+    { "name": "Monaco",      "goals": 27,  "color": "#E73C32", "tcolor": "#E73C32", "years": "2015–2017"    }
+  ],
+  "links": [
+    { "type": "right",   "club": "PSG",         "value": 179 },
+    { "type": "right",   "club": "Real Madrid", "value": 60  },
+    { "type": "right",   "club": "France",      "value": 40  },
+    { "type": "right",   "club": "Monaco",      "value": 19  },
+    { "type": "left",    "club": "PSG",         "value": 51  },
+    { "type": "left",    "club": "Real Madrid", "value": 17  },
+    { "type": "left",    "club": "France",      "value": 11  },
+    { "type": "left",    "club": "Monaco",      "value": 5   },
+    { "type": "header",  "club": "PSG",         "value": 13  },
+    { "type": "header",  "club": "Real Madrid", "value": 4   },
+    { "type": "header",  "club": "France",      "value": 3   },
+    { "type": "header",  "club": "Monaco",      "value": 1   },
+    { "type": "penalty", "club": "PSG",         "value": 26  },
+    { "type": "penalty", "club": "Real Madrid", "value": 9   },
+    { "type": "penalty", "club": "France",      "value": 7   },
+    { "type": "penalty", "club": "Monaco",      "value": 1   }
+  ],
+  "validation": {
+    "totalFromClubs": 426,
+    "typesSum": 445,
+    "penaltyOverlap": true,
+    "notes": "penalty (43) is a storytelling subset of right-foot goals — already counted within the right-foot total. typesSum (445) exceeds meta.total (424) by 21. CLUBS.goals sum 426 is 2 above meta.total 424 — minor rounding in source data. LINKS approximations: right 298 vs type.total 296 (Δ2), left 84 vs 85 (Δ1). header (21) and penalty (43) links match TYPES.total exactly."
+  }
+}

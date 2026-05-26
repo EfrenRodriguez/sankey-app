@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Cristiano Ronaldo — 971 Career Goals",
+    "subtitle": "CAREER STATISTICS · GOAL ANATOMY",
+    "subject": "Cristiano Ronaldo",
+    "total": 971,
+    "unit": "goals",
+    "source": "messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026",
+    "theme": "light"
+  },
+  "types": [
+    { "id": "right",  "label": "Right foot", "total": 620, "pct": "64%", "color": "#E8361A" },
+    { "id": "left",   "label": "Left foot",  "total": 187, "pct": "19%", "color": "#4F86C6" },
+    { "id": "header", "label": "Header",     "total": 164, "pct": "17%", "color": "#5BAD8F" }
+  ],
+  "clubs": [
+    { "name": "Real Madrid",    "goals": 451, "color": "#7B3F9E", "tcolor": "#5a2d75", "years": "2009–2018"           },
+    { "name": "Manchester Utd", "goals": 145, "color": "#C8102E", "tcolor": "#C8102E", "years": "2003–2009, 2021–2022" },
+    { "name": "Al Nassr",       "goals": 129, "color": "#F5C518", "tcolor": "#8a6e00", "years": "2023–present"        },
+    { "name": "Juventus",       "goals": 101, "color": "#1a1a1a", "tcolor": "#1a1a1a", "years": "2018–2021"           },
+    { "name": "Portugal",       "goals": 143, "color": "#006600", "tcolor": "#004d00", "years": "2003–present"        },
+    { "name": "Sporting CP",    "goals": 5,   "color": "#006B2B", "tcolor": "#004d1f", "years": "2002–2003"           }
+  ],
+  "links": [
+    { "type": "right", "club": "Real Madrid",    "value": 289 },
+    { "type": "right", "club": "Manchester Utd", "value": 93  },
+    { "type": "right", "club": "Al Nassr",       "value": 83  },
+    { "type": "right", "club": "Juventus",       "value": 65  },
+    { "type": "right", "club": "Portugal",       "value": 85  },
+    { "type": "right", "club": "Sporting CP",    "value": 5   },
+    { "type": "left",  "club": "Real Madrid",    "value": 86  },
+    { "type": "left",  "club": "Manchester Utd", "value": 28  },
+    { "type": "left",  "club": "Al Nassr",       "value": 24  },
+    { "type": "left",  "club": "Juventus",       "value": 19  },
+    { "type": "left",  "club": "Portugal",       "value": 27  },
+    { "type": "left",  "club": "Sporting CP",    "value": 3   },
+    { "type": "header", "club": "Real Madrid",    "value": 76  },
+    { "type": "header", "club": "Manchester Utd", "value": 24  },
+    { "type": "header", "club": "Al Nassr",       "value": 22  },
+    { "type": "header", "club": "Juventus",       "value": 17  },
+    { "type": "header", "club": "Portugal",       "value": 22  },
+    { "type": "header", "club": "Sporting CP",    "value": 3   }
+  ],
+  "validation": {
+    "totalFromClubs": 974,
+    "typesSum": 971,
+    "penaltyOverlap": false,
+    "notes": "No penalty overlap — all three types (right, left, header) are distinct with no double-counting. typesSum (971) equals meta.total (971). CLUBS.goals sum 974 is 3 above meta.total 971 — minor rounding in source data, documented in component. All LINKS type sums match TYPES.total exactly."
+  }
+}

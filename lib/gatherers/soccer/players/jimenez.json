@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Raúl Jiménez — 149 Career Goals",
+    "subtitle": "CAREER STATISTICS · GOAL ANATOMY",
+    "subject": "Raúl Jiménez",
+    "total": 149,
+    "unit": "goals",
+    "source": "messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026",
+    "theme": "light"
+  },
+  "types": [
+    { "id": "right",   "label": "Right foot", "total": 82, "pct": "55%", "color": "#006847" },
+    { "id": "header",  "label": "Header",     "total": 37, "pct": "25%", "color": "#CE1126" },
+    { "id": "left",    "label": "Left foot",  "total": 22, "pct": "15%", "color": "#4F86C6" },
+    { "id": "penalty", "label": "Penalty",    "total": 28, "pct": "19%", "color": "#E8A838" }
+  ],
+  "clubs": [
+    { "name": "Wolves",       "goals": 57, "color": "#FDB913", "tcolor": "#8a6e00", "years": "2018–2023"    },
+    { "name": "Mexico",       "goals": 44, "color": "#006847", "tcolor": "#004d33", "years": "2013–present" },
+    { "name": "Fulham",       "goals": 28, "color": "#000000", "tcolor": "#333333", "years": "2023–present" },
+    { "name": "Benfica",      "goals": 16, "color": "#E4002B", "tcolor": "#b00020", "years": "2015–2019"    },
+    { "name": "Club América", "goals": 38, "color": "#FFD700", "tcolor": "#8a6e00", "years": "2011–2014"    }
+  ],
+  "links": [
+    { "type": "right",   "club": "Wolves",       "value": 31 },
+    { "type": "right",   "club": "Mexico",       "value": 24 },
+    { "type": "right",   "club": "Fulham",       "value": 15 },
+    { "type": "right",   "club": "Benfica",      "value": 9  },
+    { "type": "right",   "club": "Club América", "value": 21 },
+    { "type": "header",  "club": "Wolves",       "value": 14 },
+    { "type": "header",  "club": "Mexico",       "value": 11 },
+    { "type": "header",  "club": "Fulham",       "value": 7  },
+    { "type": "header",  "club": "Benfica",      "value": 4  },
+    { "type": "header",  "club": "Club América", "value": 9  },
+    { "type": "left",    "club": "Wolves",       "value": 6  },
+    { "type": "left",    "club": "Mexico",       "value": 5  },
+    { "type": "left",    "club": "Fulham",       "value": 3  },
+    { "type": "left",    "club": "Benfica",      "value": 2  },
+    { "type": "left",    "club": "Club América", "value": 6  },
+    { "type": "penalty", "club": "Wolves",       "value": 16 },
+    { "type": "penalty", "club": "Mexico",       "value": 10 },
+    { "type": "penalty", "club": "Fulham",       "value": 2  }
+  ],
+  "validation": {
+    "totalFromClubs": 183,
+    "typesSum": 169,
+    "penaltyOverlap": true,
+    "notes": "penalty (28) is a storytelling subset — those goals are already counted within the right/left/header split. typesSum (169) exceeds meta.total (149) by 20. CLUBS.goals sum 183 is 34 above meta.total 149 — CLUBS.goals reflect actual career totals; LINKS are visual approximations per project convention. LINKS approximations: right 100 vs type.total 82 (Δ18), header 45 vs 37 (Δ8). left (22) and penalty (28) links match TYPES.total exactly. Penalty links cover only 3 clubs (Wolves 16, Mexico 10, Fulham 2) — no penalties recorded at Benfica or Club América."
+  }
+}

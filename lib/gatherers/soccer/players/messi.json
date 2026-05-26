@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "title": "Lionel Messi — 900 Career Goals",
+    "subtitle": "CAREER STATISTICS · GOAL ANATOMY",
+    "subject": "Lionel Messi",
+    "total": 900,
+    "unit": "goals",
+    "source": "messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026",
+    "theme": "light"
+  },
+  "types": [
+    { "id": "left",     "label": "Left foot",  "total": 756, "pct": "84%", "color": "#4F86C6" },
+    { "id": "right",    "label": "Right foot", "total": 110, "pct": "12%", "color": "#E8A838" },
+    { "id": "penalty",  "label": "Penalty",    "total": 113, "pct": "13%", "color": "#C9625F" },
+    { "id": "header",   "label": "Header",     "total": 30,  "pct": "3%",  "color": "#5BAD8F" },
+    { "id": "freekick", "label": "Free kick",  "total": 62,  "pct": "7%",  "color": "#9B59B6" }
+  ],
+  "clubs": [
+    { "name": "Barcelona",   "goals": 672, "color": "#A50044", "tcolor": "#A50044", "years": "2004–2021"    },
+    { "name": "Argentina",   "goals": 115, "color": "#4A7FC1", "tcolor": "#1a4f8a", "years": "2005–present" },
+    { "name": "Inter Miami", "goals": 81,  "color": "#E91E8C", "tcolor": "#9a0f5e", "years": "2023–present" },
+    { "name": "PSG",         "goals": 32,  "color": "#003370", "tcolor": "#003370", "years": "2021–2023"    }
+  ],
+  "links": [
+    { "type": "left",     "club": "Barcelona",   "value": 565 },
+    { "type": "left",     "club": "Argentina",   "value": 95  },
+    { "type": "left",     "club": "Inter Miami", "value": 64  },
+    { "type": "left",     "club": "PSG",         "value": 32  },
+    { "type": "right",    "club": "Barcelona",   "value": 78  },
+    { "type": "right",    "club": "Argentina",   "value": 16  },
+    { "type": "right",    "club": "Inter Miami", "value": 13  },
+    { "type": "right",    "club": "PSG",         "value": 3   },
+    { "type": "penalty",  "club": "Barcelona",   "value": 77  },
+    { "type": "penalty",  "club": "Argentina",   "value": 21  },
+    { "type": "penalty",  "club": "Inter Miami", "value": 12  },
+    { "type": "penalty",  "club": "PSG",         "value": 3   },
+    { "type": "header",   "club": "Barcelona",   "value": 24  },
+    { "type": "header",   "club": "Argentina",   "value": 4   },
+    { "type": "header",   "club": "Inter Miami", "value": 2   },
+    { "type": "freekick", "club": "Barcelona",   "value": 46  },
+    { "type": "freekick", "club": "Argentina",   "value": 13  },
+    { "type": "freekick", "club": "Inter Miami", "value": 2   },
+    { "type": "freekick", "club": "PSG",         "value": 1   }
+  ],
+  "validation": {
+    "totalFromClubs": 900,
+    "typesSum": 1071,
+    "penaltyOverlap": true,
+    "notes": "penalty (113) and freekick (62) are storytelling subsets already counted within left-foot totals. typesSum exceeds meta.total by 171. CLUBS sum matches TOTAL exactly (900). All LINKS type sums match TYPES.total exactly."
+  }
+}
