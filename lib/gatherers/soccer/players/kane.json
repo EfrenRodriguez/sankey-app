@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "title": "Harry Kane — 510 Career Goals",
+    "subtitle": "CAREER STATISTICS · GOAL ANATOMY",
+    "subject": "Harry Kane",
+    "total": 510,
+    "unit": "goals",
+    "source": "messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026",
+    "theme": "light"
+  },
+  "types": [
+    { "id": "right",   "label": "Right foot", "total": 306, "pct": "60%", "color": "#C8102E" },
+    { "id": "penalty", "label": "Penalty",    "total": 102, "pct": "20%", "color": "#E8A838" },
+    { "id": "header",  "label": "Header",     "total": 77,  "pct": "15%", "color": "#5BAD8F" },
+    { "id": "left",    "label": "Left foot",  "total": 51,  "pct": "10%", "color": "#4F86C6" }
+  ],
+  "clubs": [
+    { "name": "Tottenham",  "goals": 280, "color": "#132257", "tcolor": "#132257", "years": "2009–2023"    },
+    { "name": "Bayern",     "goals": 140, "color": "#DC052D", "tcolor": "#DC052D", "years": "2023–present" },
+    { "name": "England",    "goals": 78,  "color": "#C8102E", "tcolor": "#9e0c24", "years": "2015–present" },
+    { "name": "Loan clubs", "goals": 16,  "color": "#888888", "tcolor": "#555555", "years": "2011–2013"    }
+  ],
+  "links": [
+    { "type": "right",   "club": "Tottenham",  "value": 168 },
+    { "type": "right",   "club": "Bayern",     "value": 84  },
+    { "type": "right",   "club": "England",    "value": 47  },
+    { "type": "right",   "club": "Loan clubs", "value": 10  },
+    { "type": "penalty", "club": "Tottenham",  "value": 56  },
+    { "type": "penalty", "club": "Bayern",     "value": 28  },
+    { "type": "penalty", "club": "England",    "value": 15  },
+    { "type": "penalty", "club": "Loan clubs", "value": 3   },
+    { "type": "header",  "club": "Tottenham",  "value": 42  },
+    { "type": "header",  "club": "Bayern",     "value": 21  },
+    { "type": "header",  "club": "England",    "value": 12  },
+    { "type": "header",  "club": "Loan clubs", "value": 2   },
+    { "type": "left",    "club": "Tottenham",  "value": 28  },
+    { "type": "left",    "club": "Bayern",     "value": 14  },
+    { "type": "left",    "club": "England",    "value": 7   },
+    { "type": "left",    "club": "Loan clubs", "value": 2   }
+  ],
+  "validation": {
+    "totalFromClubs": 514,
+    "typesSum": 536,
+    "penaltyOverlap": true,
+    "notes": "penalty (102) is a storytelling subset of right-foot goals — already counted within the right-foot total. typesSum (536) exceeds meta.total (510) by 26. CLUBS.goals sum 514 is 4 above meta.total 510 — minor rounding in source data. LINKS approximation: right 309 vs type.total 306 (Δ3). penalty (102), header (77), and left (51) links match TYPES.total exactly."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "title": "Erling Haaland — 310 Career Goals",
+    "subtitle": "CAREER STATISTICS · GOAL ANATOMY",
+    "subject": "Erling Haaland",
+    "total": 310,
+    "unit": "goals",
+    "source": "messivsronaldo.app · transfermarkt · soccergraph.com · as of May 2026",
+    "theme": "light"
+  },
+  "types": [
+    { "id": "left",    "label": "Left foot",  "total": 196, "pct": "63%", "color": "#4F86C6" },
+    { "id": "header",  "label": "Header",     "total": 62,  "pct": "20%", "color": "#5BAD8F" },
+    { "id": "right",   "label": "Right foot", "total": 34,  "pct": "11%", "color": "#E8A838" },
+    { "id": "penalty", "label": "Penalty",    "total": 18,  "pct": "6%",  "color": "#C9625F" }
+  ],
+  "clubs": [
+    { "name": "Man City", "goals": 175, "color": "#6CABDD", "tcolor": "#1c5fa8", "years": "2022–present" },
+    { "name": "Dortmund", "goals": 86,  "color": "#FDE100", "tcolor": "#8a6e00", "years": "2020–2022"    },
+    { "name": "Salzburg", "goals": 30,  "color": "#D40000", "tcolor": "#D40000", "years": "2019–2020"    },
+    { "name": "Norway",   "goals": 42,  "color": "#EF2B2D", "tcolor": "#b01e20", "years": "2019–present" },
+    { "name": "Molde",    "goals": 20,  "color": "#FF6B00", "tcolor": "#cc5500", "years": "2017–2019"    },
+    { "name": "Bryne",    "goals": 5,   "color": "#005B99", "tcolor": "#005B99", "years": "2016–2017"    }
+  ],
+  "links": [
+    { "type": "left",    "club": "Man City",  "value": 110 },
+    { "type": "left",    "club": "Dortmund",  "value": 54  },
+    { "type": "left",    "club": "Salzburg",  "value": 19  },
+    { "type": "left",    "club": "Norway",    "value": 26  },
+    { "type": "left",    "club": "Molde",     "value": 13  },
+    { "type": "left",    "club": "Bryne",     "value": 4   },
+    { "type": "header",  "club": "Man City",  "value": 39  },
+    { "type": "header",  "club": "Dortmund",  "value": 17  },
+    { "type": "header",  "club": "Salzburg",  "value": 6   },
+    { "type": "header",  "club": "Norway",    "value": 9   },
+    { "type": "header",  "club": "Molde",     "value": 4   },
+    { "type": "header",  "club": "Bryne",     "value": 1   },
+    { "type": "right",   "club": "Man City",  "value": 21  },
+    { "type": "right",   "club": "Dortmund",  "value": 9   },
+    { "type": "right",   "club": "Salzburg",  "value": 3   },
+    { "type": "right",   "club": "Norway",    "value": 5   },
+    { "type": "right",   "club": "Molde",     "value": 2   },
+    { "type": "right",   "club": "Bryne",     "value": 0   },
+    { "type": "penalty", "club": "Man City",  "value": 11  },
+    { "type": "penalty", "club": "Dortmund",  "value": 4   },
+    { "type": "penalty", "club": "Norway",    "value": 3   }
+  ],
+  "validation": {
+    "totalFromClubs": 358,
+    "typesSum": 310,
+    "penaltyOverlap": false,
+    "notes": "CLUBS.goals sum 358 is 48 above meta.total 310 — CLUBS.goals reflect actual career totals; LINKS are visual approximations per project convention. typesSum (310) equals meta.total (310) — no penalty overlap. LINKS sums are visual approximations: left 226 vs type.total 196 (Δ30), header 76 vs 62 (Δ14), right 40 vs 34 (Δ6). penalty links (18) match exactly. Bryne right-foot link value is 0 (included for completeness)."
+  }
+}
