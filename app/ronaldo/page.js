@@ -1,5 +1,6 @@
-import CristianoRonaldoSankey from "../components/CristianoRonaldoSankey";
+import SankeyRenderer from '@/components/SankeyRenderer';
+import ronaldoData    from '@/lib/gatherers/soccer/players/ronaldo.json';
 
 export default function RonaldoPage() {
-  return <CristianoRonaldoSankey />;
+  return <SankeyRenderer schema={ronaldoData} />;
 }

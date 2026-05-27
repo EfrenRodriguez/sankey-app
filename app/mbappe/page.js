@@ -1,5 +1,6 @@
-import MbappeSankey from "../components/MbappeSankey";
+import SankeyRenderer from '@/components/SankeyRenderer';
+import mbappeData     from '@/lib/gatherers/soccer/players/mbappe.json';
 
 export default function MbappePage() {
-  return <MbappeSankey />;
+  return <SankeyRenderer schema={mbappeData} />;
 }

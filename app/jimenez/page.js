@@ -1,5 +1,6 @@
-import RaulJimenezSankey from "../components/RaulJimenezSankey";
+import SankeyRenderer from '@/components/SankeyRenderer';
+import jimenezData    from '@/lib/gatherers/soccer/players/jimenez.json';
 
 export default function JimenezPage() {
-  return <RaulJimenezSankey />;
+  return <SankeyRenderer schema={jimenezData} />;
 }
