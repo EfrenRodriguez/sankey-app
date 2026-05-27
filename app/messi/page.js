@@ -1,5 +1,6 @@
-import MessiSankey from "../components/MessiSankey";
+import SankeyRenderer from '@/components/SankeyRenderer';
+import messiData      from '@/lib/gatherers/soccer/players/messi.json';
 
 export default function MessiPage() {
-  return <MessiSankey />;
+  return <SankeyRenderer schema={messiData} />;
 }
