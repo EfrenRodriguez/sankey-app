@@ -1,237 +1,326 @@
-"use client";
+'use client';
 
 /**
  * components/SankeyRenderer.jsx
  *
- * Generic Sankey diagram renderer.
- * Accepts a pre-computed DiagramLayout (from lib/creator) and paints it
- * as an SVG using the same bezier-ribbon technique as the hand-coded
- * player components.
+ * Generic Sankey diagram renderer for soccer player goal-anatomy diagrams.
+ *
+ * Accepts a `schema` prop in the soccer player JSON format
+ * (lib/gatherers/soccer/players/*.json) and renders an SVG that is
+ * pixel-identical to the hand-coded player components.
  *
  * Props:
- *   layout  {DiagramLayout}  — output of createDiagram() / computeLayout()
- *   theme   {Theme}          — from lib/styles (defaults to lightTheme)
- *   title   {string}         — player / entity name shown at top-left
- *   unit    {string}         — label unit, e.g. "goals" or "bytes"
- *   width   {number}         — SVG viewBox width (default 960)
- *   height  {number}         — SVG viewBox height (default 540)
+ *   schema  {object}  — player JSON object { meta, types, clubs, links }
+ *   width   {number}  — SVG width (default 960)
+ *   height  {number}  — SVG height (default 540)
+ *   theme   {string}  — 'light' | 'dark' (default 'light', light only currently)
  *
  * Usage:
- *   import { createDiagram } from "@/lib/creator";
- *   import { lightTheme }    from "@/lib/styles";
- *   import SankeyRenderer    from "@/components/SankeyRenderer";
- *
- *   const layout = createDiagram(diagramData);
- *   <SankeyRenderer layout={layout} theme={lightTheme} title="Messi" unit="goals" />
+ *   import SankeyRenderer from '@/components/SankeyRenderer';
+ *   import messiData      from '@/lib/gatherers/soccer/players/messi.json';
+ *   <SankeyRenderer schema={messiData} />
  */
 
-import { useState, useRef, useCallback } from "react";
-import { lightTheme } from "@/lib/styles/themes/light.js";
+import { useState, useMemo } from 'react';
+import { computeButterfly, ribbon } from '@/lib/creator/layout.js';
 
 // ---------------------------------------------------------------------------
-// Bezier ribbon path helper
-// ---------------------------------------------------------------------------
-
-/**
- * Build an SVG path string for a ribbon between two column nodes.
- *
- * @param {number} x0  - Right edge of source node
- * @param {number} y0  - Top of ribbon at source
- * @param {number} x1  - Left edge of target node
- * @param {number} y1  - Top of ribbon at target
- * @param {number} h0  - Ribbon height at source
- * @param {number} h1  - Ribbon height at target
- * @returns {string}   SVG path d attribute
- */
-function ribbonPath(x0, y0, x1, y1, h0, h1) {
-  const cx = (x0 + x1) / 2;
-  return [
-    `M ${x0} ${y0}`,
-    `C ${cx} ${y0}, ${cx} ${y1}, ${x1} ${y1}`,
-    `L ${x1} ${y1 + h1}`,
-    `C ${cx} ${y1 + h1}, ${cx} ${y0 + h0}, ${x0} ${y0 + h0}`,
-    "Z",
-  ].join(" ");
-}
-
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
-
-function NodeBar({ node, theme }) {
-  const colors = theme.nodeColors.default;
-  const colorIndex = node._colorIndex ?? 0;
-  const color = node.color ?? colors[colorIndex % colors.length];
-
-  return (
-    <g>
-      <rect
-        x={node.x}
-        y={node.y}
-        width={node.width}
-        height={Math.max(1, node.height)}
-        fill={color}
-        rx={2}
-      />
-    </g>
-  );
-}
-
-function NodeLabel({ node, theme, side }) {
-  const isLeft = side === "left";
-  const x      = isLeft ? node.x - 8 : node.x + node.width + 8;
-  const anchor = isLeft ? "end" : "start";
-  const cy     = node.y + node.height / 2;
-
-  return (
-    <text
-      x={x}
-      y={cy}
-      dominantBaseline="middle"
-      textAnchor={anchor}
-      fontSize={12}
-      fontFamily={theme.font.sans}
-      fill={theme.textPrimary}
-    >
-      {node.label}
-      <tspan fill={theme.textSecondary} fontSize={10}> {node.value}</tspan>
-    </text>
-  );
-}
-
-function Ribbon({ link, nodes, theme, hovered }) {
-  const src = nodes.find((n) => n.id === link.source);
-  const tgt = nodes.find((n) => n.id === link.target);
-  if (!src || !tgt) return null;
-
-  const x0 = src.x + src.width;
-  const x1 = tgt.x;
-  const d   = ribbonPath(x0, link.sy, x1, link.ty, link.sh, link.th);
-
-  const isHovered = hovered === link.source || hovered === link.target;
-  const fill      = link.color ??
-    (isHovered ? theme.ribbon.fillHover : theme.ribbon.fill);
-
-  return (
-    <path
-      d={d}
-      fill={fill}
-      stroke={theme.ribbon.stroke}
-      style={{ transition: "fill 0.15s ease" }}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Main component
+// SankeyRenderer
 // ---------------------------------------------------------------------------
 
 export default function SankeyRenderer({
-  layout,
-  theme    = lightTheme,
-  title    = "",
-  unit     = "goals",
-  width    = 960,
-  height   = 540,
+  schema,
+  width  = 960,
+  height = 540,
+  theme  = 'light',
 }) {
-  const [hovered, setHovered] = useState(null);
-  const svgRef = useRef(null);
+  // ── Extract from schema ──────────────────────────────────────────────────
+  const { meta, types, clubs, links } = schema;
+  const TOTAL = meta.total;
+  const UNIT  = meta.unit ?? 'goals';
 
-  const handleMouseMove = useCallback(
-    (e) => {
-      if (!svgRef.current) return;
-      const rect = svgRef.current.getBoundingClientRect();
-      const mx   = ((e.clientX - rect.left) / rect.width)  * width;
-      const my   = ((e.clientY - rect.top)  / rect.height) * height;
+  // ── Map domain schema → generic layout terms ─────────────────────────────
+  const leftNodes  = useMemo(() =>
+    types.map(t => ({
+      id:    t.id,
+      label: t.label,
+      value: t.total,
+      pct:   t.pct,
+      color: t.color,
+    })),
+  [types]);
 
-      // Find which node the cursor is closest to
-      let closest     = null;
-      let closestDist = Infinity;
-      for (const node of layout.nodes) {
-        const cx   = node.x + node.width / 2;
-        const cy   = node.y + node.height / 2;
-        const dist = Math.hypot(mx - cx, my - cy);
-        if (dist < closestDist) { closestDist = dist; closest = node.id; }
-      }
-      setHovered(closestDist < 80 ? closest : null);
-    },
-    [layout.nodes, width, height]
-  );
+  const rightNodes = useMemo(() =>
+    clubs.map(c => ({
+      id:     c.name,
+      label:  c.name,
+      value:  c.goals,
+      color:  c.color,
+      tcolor: c.tcolor,
+      meta:   c.years,   // secondary annotation (years active)
+    })),
+  [clubs]);
 
-  // Assign a stable color index per node (left column drives palette)
-  const coloredNodes = (() => {
-    let idx = 0;
-    return layout.nodes.map((n) => ({
-      ...n,
-      _colorIndex: idx++,
-    }));
-  })();
+  const flowLinks = useMemo(() =>
+    links.map(l => ({
+      leftId:  l.type,
+      rightId: l.club,
+      value:   l.value,
+    })),
+  [links]);
 
-  const coloredNodeMap = new Map(coloredNodes.map((n) => [n.id, n]));
+  // ── Compute butterfly layout ─────────────────────────────────────────────
+  const layout = useMemo(() =>
+    computeButterfly({ leftNodes, rightNodes, links: flowLinks, total: TOTAL }),
+  [leftNodes, rightNodes, flowLinks, TOTAL]);
 
-  // Separate left and right columns for label placement
-  const colIds    = [...new Set(coloredNodes.map((n) => n.column))];
-  const leftColId = colIds[0];
+  const { typeNodes, clubNodes, midSegments, flows, dimensions } = layout;
+  const { leftFlows, rightFlows } = flows;
+  const { W, H, MID_X, MID_TOP, MID_BOT, NODE_W } = dimensions;
 
+  // ── Hover + tooltip state ────────────────────────────────────────────────
+  const [hl,      setHl]      = useState(null);
+  const [tooltip, setTooltip] = useState(null);
+
+  /**
+   * Flow opacity based on current hover state.
+   * Mirrors lOpacity() in every player component exactly.
+   */
+  function flowOpacity(leftId, rightId) {
+    if (!hl) return 0.30;
+    if (hl.kind === 'left')  return hl.id === leftId  ? 0.65 : 0.04;
+    if (hl.kind === 'right') return hl.id === rightId ? 0.65 : 0.04;
+    return 0.30;
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div style={{
-      width: "100%",
-      background: theme.background,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
+      background:     '#f4f5f7',
+      minHeight:      '100vh',
+      display:        'flex',
+      flexDirection:  'column',
+      alignItems:     'center',
+      justifyContent: 'center',
+      fontFamily:     "'Inter','Helvetica Neue',sans-serif",
+      padding:        '28px 12px',
     }}>
-      {title && (
-        <div style={{
-          fontFamily:    theme.font.sans,
-          fontSize:      22,
-          fontWeight:    800,
-          color:         theme.textPrimary,
-          letterSpacing: -0.5,
-          marginBottom:  8,
-          alignSelf:     "flex-start",
-          paddingLeft:   24,
-        }}>
-          {title}
-          <span style={{ fontSize: 13, fontWeight: 400, color: theme.textSecondary, marginLeft: 8 }}>
-            {layout.nodes.find((n) => n.column === colIds[0])?.value ?? ""} {unit}
-          </span>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');`}</style>
+
+      {/* ── White card ── */}
+      <div style={{
+        position:     'relative',
+        width:        '100%',
+        maxWidth:     W,
+        background:   '#fff',
+        borderRadius: 20,
+        boxShadow:    '0 2px 40px rgba(0,0,0,0.09)',
+      }}>
+        <svg
+          width={W}
+          height={H}
+          viewBox={`0 0 ${W} ${H}`}
+          style={{ display: 'block', width: '100%', overflow: 'visible' }}
+        >
+          <rect width={W} height={H} fill="#fff" rx="20"/>
+
+          {/* ── Left flows (left node → centre bar) ── */}
+          {leftFlows.map(f => (
+            <path
+              key={f.id}
+              d={ribbon(f.x1, f.y1, f.t1, f.x2, f.y2, f.t2)}
+              fill={f.color}
+              opacity={flowOpacity(f.leftId, f.rightId)}
+              style={{ transition: 'opacity 0.15s' }}
+              onMouseEnter={e => {
+                setHl({ kind: 'left', id: f.leftId });
+                setTooltip({ x: e.clientX, y: e.clientY, leftId: f.leftId, rightId: f.rightId, value: f.value });
+              }}
+              onMouseLeave={() => { setHl(null); setTooltip(null); }}
+            />
+          ))}
+
+          {/* ── Right flows (centre bar → right node) ── */}
+          {rightFlows.map(f => (
+            <path
+              key={f.id}
+              d={ribbon(f.x1, f.y1, f.t1, f.x2, f.y2, f.t2)}
+              fill={f.color}
+              opacity={flowOpacity(f.leftId, f.rightId)}
+              style={{ transition: 'opacity 0.15s' }}
+              onMouseEnter={e => {
+                setHl({ kind: 'right', id: f.rightId });
+                setTooltip({ x: e.clientX, y: e.clientY, leftId: f.leftId, rightId: f.rightId, value: f.value });
+              }}
+              onMouseLeave={() => { setHl(null); setTooltip(null); }}
+            />
+          ))}
+
+          {/* ── Centre bar: continuous stacked segments ── */}
+          {midSegments.map(s => (
+            <rect key={s.id} x={MID_X} y={s.y} width={NODE_W} height={s.h} fill={s.color} opacity={0.95}/>
+          ))}
+          {/* Centre bar labels: total count + unit */}
+          <text
+            x={MID_X + NODE_W / 2}
+            y={(MID_TOP + MID_BOT) / 2 + 7}
+            textAnchor="middle" fontFamily="Inter,sans-serif"
+            fontSize={22} fontWeight={900} fill="#1a202c"
+          >{TOTAL}</text>
+          <text
+            x={MID_X + NODE_W / 2}
+            y={(MID_TOP + MID_BOT) / 2 + 22}
+            textAnchor="middle" fontFamily="Inter,sans-serif"
+            fontSize={9} fontWeight={600} fill="#718096" letterSpacing={1}
+          >{UNIT.toUpperCase()}</text>
+
+          {/* ── Header ── */}
+          <text
+            x={W / 2} y={22} textAnchor="middle"
+            fontFamily="Inter,sans-serif" fontSize={10} fontWeight={600}
+            fill="#a0aec0" letterSpacing={2}
+          >{meta.subtitle ?? 'CAREER STATISTICS · GOAL ANATOMY'}</text>
+          <text
+            x={W / 2} y={50} textAnchor="middle"
+            fontFamily="Inter,sans-serif" fontSize={25} fontWeight={800}
+            fill="#1a202c"
+          >{meta.title}</text>
+
+          {/* ── Column labels ── */}
+          {[
+            [dimensions.LEFT_X,              'GOAL TYPE'      ],
+            [MID_X + NODE_W / 2,             'TOTAL'          ],
+            [dimensions.RIGHT_X + NODE_W / 2,'CLUB / COUNTRY' ],
+          ].map(([x, lbl]) => (
+            <text
+              key={lbl} x={x} y={72} textAnchor="middle"
+              fontFamily="Inter,sans-serif" fontSize={10} fontWeight={600}
+              fill="#b0bac8" letterSpacing={1.5}
+            >{lbl}</text>
+          ))}
+
+          {/* ── Left column nodes ── */}
+          {typeNodes.map(t => (
+            <g
+              key={t.id}
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHl({ kind: 'left', id: t.id })}
+              onMouseLeave={() => setHl(null)}
+            >
+              <rect
+                x={t.x} y={t.y} width={NODE_W} height={t.h}
+                fill={t.color} rx={3}
+                opacity={hl?.kind === 'left' && hl.id !== t.id ? 0.18 : 1}
+              />
+              <text
+                x={t.x - 14} y={t.cy - 10}
+                textAnchor="end" fontFamily="Inter,sans-serif"
+                fontSize={14} fontWeight={700} fill={t.color}
+              >{t.label}</text>
+              <text
+                x={t.x - 14} y={t.cy + 9}
+                textAnchor="end" fontFamily="Inter,sans-serif"
+                fontSize={22} fontWeight={800} fill="#1a202c"
+              >{t.value}</text>
+              <text
+                x={t.x - 14} y={t.cy + 24}
+                textAnchor="end" fontFamily="Inter,sans-serif"
+                fontSize={11} fill="#b0bac8"
+              >{t.pct} of {UNIT}</text>
+            </g>
+          ))}
+
+          {/* ── Right column nodes ── */}
+          {clubNodes.map(c => (
+            <g
+              key={c.id}
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHl({ kind: 'right', id: c.id })}
+              onMouseLeave={() => setHl(null)}
+            >
+              <rect
+                x={c.x} y={c.y} width={NODE_W} height={c.h}
+                fill={c.color} rx={3}
+                opacity={hl?.kind === 'right' && hl.id !== c.id ? 0.15 : 1}
+              />
+              <text
+                x={c.x + NODE_W + 14} y={c.cy - 9}
+                textAnchor="start" fontFamily="Inter,sans-serif"
+                fontSize={15} fontWeight={800} fill={c.tcolor || c.color}
+                opacity={hl?.kind === 'right' && hl.id !== c.id ? 0.2 : 1}
+              >{c.label}</text>
+              <text
+                x={c.x + NODE_W + 14} y={c.cy + 6}
+                textAnchor="start" fontFamily="Inter,sans-serif"
+                fontSize={11} fill="#a0aec0"
+                opacity={hl?.kind === 'right' && hl.id !== c.id ? 0.2 : 1}
+              >{c.meta}</text>
+              <text
+                x={c.x + NODE_W + 14} y={c.cy + 23}
+                textAnchor="start" fontFamily="Inter,sans-serif"
+                fontSize={17} fontWeight={800} fill="#1a202c"
+                opacity={hl?.kind === 'right' && hl.id !== c.id ? 0.2 : 1}
+              >{c.value} {UNIT}</text>
+            </g>
+          ))}
+
+          {/* ── Legend ── */}
+          {typeNodes.map((t, i) => (
+            <g key={`leg-${t.id}`}>
+              <rect
+                x={148 + i * 150} y={H - 22}
+                width={10} height={10}
+                fill={t.color} rx={2}
+              />
+              <text
+                x={163 + i * 150} y={H - 12}
+                fontFamily="Inter,sans-serif" fontSize={11} fill="#718096"
+              >{t.label}</text>
+            </g>
+          ))}
+        </svg>
+
+        {/* ── Tooltip ── */}
+        {tooltip && (() => {
+          const leftNode  = typeNodes.find(n => n.id  === tooltip.leftId);
+          const rightNode = clubNodes .find(n => n.id  === tooltip.rightId);
+          if (!leftNode) return null;
+          return (
+            <div style={{
+              position:     'fixed',
+              left:         tooltip.x + 16,
+              top:          tooltip.y - 16,
+              background:   '#fff',
+              border:       `2px solid ${leftNode.color}`,
+              borderRadius: 10,
+              padding:      '10px 16px',
+              fontFamily:   'Inter,sans-serif',
+              pointerEvents:'none',
+              zIndex:       300,
+              boxShadow:    '0 8px 32px rgba(0,0,0,0.13)',
+              whiteSpace:   'nowrap',
+            }}>
+              <div style={{ fontSize: 10, color: '#a0aec0', fontWeight: 600, letterSpacing: 0.5, marginBottom: 3 }}>
+                {leftNode.label.toUpperCase()} → {(rightNode?.label ?? tooltip.rightId).toUpperCase()}
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: leftNode.color }}>
+                {tooltip.value}
+                <span style={{ fontSize: 12, color: '#718096', marginLeft: 6, fontWeight: 500 }}>{UNIT}</span>
+              </div>
+              <div style={{ fontSize: 11, color: '#a0aec0', marginTop: 2 }}>
+                {Math.round(tooltip.value / TOTAL * 100)}% of career total
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* ── Footer attribution ── */}
+      {meta.source && (
+        <div style={{ marginTop: 14, fontSize: 10, color: '#c0c8d8', textAlign: 'center' }}>
+          Data: {meta.source}
         </div>
       )}
-
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${width} ${height}`}
-        style={{ width: "100%", maxWidth: width, display: "block" }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => setHovered(null)}
-      >
-        {/* Ribbons (drawn first, behind nodes) */}
-        {layout.links.map((link, i) => (
-          <Ribbon
-            key={i}
-            link={link}
-            nodes={coloredNodes}
-            theme={theme}
-            hovered={hovered}
-          />
-        ))}
-
-        {/* Node bars */}
-        {coloredNodes.map((node) => (
-          <NodeBar key={node.id} node={node} theme={theme} />
-        ))}
-
-        {/* Node labels */}
-        {coloredNodes.map((node) => (
-          <NodeLabel
-            key={`label-${node.id}`}
-            node={node}
-            theme={theme}
-            side={node.column === leftColId ? "left" : "right"}
-          />
-        ))}
-      </svg>
     </div>
   );
 }
