@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "title": "Ousmane Dembélé — 126 Career Goals",
+    "subtitle": "CAREER STATISTICS · GOAL ANATOMY",
+    "subject": "Ousmane Dembélé",
+    "total": 126,
+    "unit": "goals",
+    "source": "footystats.org · transfermarkt · fctables.com · as of May 2026",
+    "theme": "light"
+  },
+  "types": [
+    { "id": "right",    "label": "Right foot", "total": 57,  "pct": "45%", "color": "#E8A838" },
+    { "id": "left",     "label": "Left foot",  "total": 52,  "pct": "41%", "color": "#4F86C6" },
+    { "id": "header",   "label": "Header",     "total": 14,  "pct": "11%", "color": "#5BAD8F" },
+    { "id": "penalty",  "label": "Penalty",    "total": 3,   "pct": "2%",  "color": "#C9625F" }
+  ],
+  "clubs": [
+    { "name": "PSG",       "goals": 60,  "color": "#003370", "tcolor": "#003370", "years": "2023–present" },
+    { "name": "Barcelona", "goals": 40,  "color": "#A50044", "tcolor": "#A50044", "years": "2017–2023"    },
+    { "name": "France",    "goals": 13,  "color": "#002395", "tcolor": "#002395", "years": "2016–present" },
+    { "name": "Dortmund",  "goals": 10,  "color": "#FDE100", "tcolor": "#8a6e00", "years": "2016–2017"    },
+    { "name": "Rennes",    "goals": 7,   "color": "#EF0000", "tcolor": "#b00000", "years": "2015–2016"    }
+  ],
+  "links": [
+    { "type": "right",   "club": "PSG",       "value": 27 },
+    { "type": "right",   "club": "Barcelona", "value": 18 },
+    { "type": "right",   "club": "France",    "value": 6  },
+    { "type": "right",   "club": "Dortmund",  "value": 4  },
+    { "type": "right",   "club": "Rennes",    "value": 3  },
+    { "type": "left",    "club": "PSG",       "value": 24 },
+    { "type": "left",    "club": "Barcelona", "value": 16 },
+    { "type": "left",    "club": "France",    "value": 5  },
+    { "type": "left",    "club": "Dortmund",  "value": 4  },
+    { "type": "left",    "club": "Rennes",    "value": 3  },
+    { "type": "header",  "club": "PSG",       "value": 6  },
+    { "type": "header",  "club": "Barcelona", "value": 5  },
+    { "type": "header",  "club": "France",    "value": 2  },
+    { "type": "header",  "club": "Dortmund",  "value": 1  },
+    { "type": "penalty", "club": "PSG",       "value": 2  },
+    { "type": "penalty", "club": "Barcelona", "value": 1  }
+  ],
+  "validation": {
+    "totalFromClubs": 130,
+    "typesSum": 126,
+    "penaltyOverlap": false,
+    "notes": "Dembélé is both-footed — 45% right / 41% left — the closest split of any player in this collection. Penalty total (3) is small enough to fold into right foot rather than break out separately, but shown separately for consistency. Club totals sum to 130 due to minor source discrepancies across competitions; TOTAL set to 126 matching footystats career aggregate. Champions League final opponent is Arsenal, May 31 2026."
+  }
+}

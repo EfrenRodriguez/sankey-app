@@ -10,6 +10,7 @@ const PLAYERS = [
   { name: "Mbappé",  href: "/mbappe"  },
   { name: "Kane",    href: "/kane"    },
   { name: "Jiménez", href: "/jimenez" },
+  { name: "Dembélé", href: "/dembele" },
 ];
 
 export default function NavBar() {
